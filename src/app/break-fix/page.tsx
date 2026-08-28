@@ -10,8 +10,11 @@ import {
   Sparkles,
   ArrowRight,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ShieldCheck,
   Zap,
+  Terminal,
 } from 'lucide-react';
 import { TROUBLESHOOTING_CHALLENGES, getScenarioPresetState } from '@/data/troubleshooting';
 import { TroubleshootingChallenge } from '@/types/curriculum';
@@ -28,6 +31,7 @@ export default function BreakFixPage() {
   const [isBrokenApplied, setIsBrokenApplied] = useState(false);
   const [revealedHints, setRevealedHints] = useState<number>(0);
   const [isSolved, setIsSolved] = useState(false);
+  const [isMobileTerminalExpanded, setIsMobileTerminalExpanded] = useState(true);
 
   useEffect(() => {
     const unsub = getDockerEngine().subscribe((s) => {
@@ -58,10 +62,10 @@ export default function BreakFixPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden transition-colors">
       {/* Left Challenge Rail */}
-      <aside className="w-full md:w-80 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm">
-        <div className="p-4 border-b border-[var(--border-color)]">
+      <aside className="w-full lg:w-72 xl:w-80 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm max-h-48 lg:max-h-full">
+        <div className="p-3.5 border-b border-[var(--border-color)]">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono flex items-center space-x-2">
               <Wrench className="w-3.5 h-3.5 text-rose-500" />
@@ -73,7 +77,7 @@ export default function BreakFixPage() {
           </div>
         </div>
 
-        <nav className="p-2 space-y-1.5">
+        <nav className="p-2 space-y-1.5 overflow-y-auto">
           {TROUBLESHOOTING_CHALLENGES.map((ch) => {
             const isSelected = selectedChallenge.id === ch.id;
             const isDone = progress.completedChallenges.includes(ch.id);
@@ -111,10 +115,9 @@ export default function BreakFixPage() {
         </nav>
       </aside>
 
-      {/* Main Sandbox & Terminal Split */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2.5 p-2.5 overflow-hidden">
-        {/* Challenge Diagnostic Details (7 cols) */}
-        <div className="lg:col-span-7 h-full overflow-y-auto p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-6 shadow-sm">
+      {/* Main Sandbox Details (Independently Scrollable) */}
+      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6 pb-24 lg:pb-8">
           {/* Header */}
           <div className="space-y-2 pb-4 border-b border-[var(--border-color)]">
             <div className="flex items-center space-x-2">
@@ -137,7 +140,7 @@ export default function BreakFixPage() {
           </div>
 
           {/* Action Trigger Card */}
-          <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="space-y-1">
               <span className="font-bold text-xs text-[var(--text-primary)] font-display block">
                 {isBrokenApplied ? '🔥 Broken Environment Active' : 'Ready to diagnose incident'}
@@ -187,7 +190,7 @@ export default function BreakFixPage() {
             </div>
 
             {revealedHints === 0 ? (
-              <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] italic text-center">
+              <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] italic text-center shadow-sm">
                 Try diagnosing with commands first (e.g. <code>docker ps -a</code>, <code>docker logs</code>). Reveal hints if stuck!
               </div>
             ) : (
@@ -207,7 +210,7 @@ export default function BreakFixPage() {
 
           {/* Suggested commands */}
           {selectedChallenge.suggestedCommands.length > 0 && (
-            <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2">
+            <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2 shadow-sm">
               <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider block font-bold">
                 Suggested Diagnostic Commands:
               </span>
@@ -216,7 +219,7 @@ export default function BreakFixPage() {
                   <button
                     key={i}
                     onClick={() => triggerRunCommand(cmd)}
-                    className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-[var(--bg-card)] text-[var(--brand-primary)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs font-mono font-semibold transition-all shadow-sm"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] text-[var(--brand-primary)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs font-mono font-semibold transition-all shadow-sm"
                   >
                     <Zap className="w-3.5 h-3.5" />
                     <span>{cmd}</span>
@@ -243,12 +246,31 @@ export default function BreakFixPage() {
             </div>
           )}
         </div>
+      </main>
 
-        {/* Live Terminal (5 cols) */}
-        <div className="lg:col-span-5 h-full flex flex-col overflow-hidden">
+      {/* Sticky Right Terminal */}
+      <section
+        className={`w-full lg:w-[460px] xl:w-[520px] shrink-0 flex flex-col bg-[var(--bg-card)] border-t lg:border-t-0 lg:border-l border-[var(--border-color)] transition-all z-30 shadow-xl ${
+          isMobileTerminalExpanded ? 'h-80 lg:h-full' : 'h-11 lg:h-full'
+        }`}
+      >
+        <div
+          className="lg:hidden flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] cursor-pointer select-none"
+          onClick={() => setIsMobileTerminalExpanded(!isMobileTerminalExpanded)}
+        >
+          <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)] font-display">
+            <Terminal className="w-4 h-4 text-rose-500" />
+            <span>Interactive Docker Terminal (Sticky)</span>
+          </div>
+          <button className="p-1 text-[var(--text-muted)]">
+            {isMobileTerminalExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col overflow-hidden p-2 lg:p-2.5">
           <DockerTerminal className="h-full" />
         </div>
-      </div>
+      </section>
     </div>
   );
 }

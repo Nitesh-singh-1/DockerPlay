@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   Sparkles,
   Zap,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
 import { getDockerEngine } from '@/lib/simulator/DockerEngine';
@@ -35,6 +37,7 @@ export default function ChapterPage() {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [lastExecutedCommand, setLastExecutedCommand] = useState<string>('');
   const [progress, setProgress] = useState(() => ProgressManager.load());
+  const [isMobileTerminalExpanded, setIsMobileTerminalExpanded] = useState(true);
 
   useEffect(() => {
     const unsub = engine.subscribe((newState) => {
@@ -59,10 +62,10 @@ export default function ChapterPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden transition-colors">
-      {/* Left Curriculum Navigation Rail */}
-      <aside className="w-full md:w-64 lg:w-72 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm">
-        <div className="p-4 border-b border-[var(--border-color)]">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden transition-colors">
+      {/* 1. Left Curriculum Navigation Rail (Desktop & Tablet) */}
+      <aside className="w-full lg:w-64 xl:w-72 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm max-h-48 lg:max-h-full">
+        <div className="p-3.5 border-b border-[var(--border-color)]">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono flex items-center space-x-2">
               <BookOpen className="w-3.5 h-3.5 text-[var(--brand-primary)]" />
@@ -74,7 +77,7 @@ export default function ChapterPage() {
           </div>
         </div>
 
-        <nav className="p-2 space-y-1">
+        <nav className="p-2 space-y-1 overflow-y-auto">
           {CURRICULUM_CHAPTERS.map((ch) => {
             const isSelected = ch.id === currentChapter.id;
             const isDone = progress.completedChapters.includes(ch.id);
@@ -83,7 +86,7 @@ export default function ChapterPage() {
               <Link
                 key={ch.id}
                 href={`/curriculum/${ch.slug}`}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all ${
+                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
                   isSelected
                     ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/40 shadow-sm'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
@@ -102,10 +105,9 @@ export default function ChapterPage() {
         </nav>
       </aside>
 
-      {/* Main Split Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2.5 p-2.5 overflow-hidden">
-        {/* Lesson Reading & Exercise Column (7 cols) */}
-        <div className="lg:col-span-7 h-full overflow-y-auto p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-6 shadow-sm">
+      {/* 2. Center Independently Scrollable Lesson Column */}
+      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6 pb-24 lg:pb-8">
           {/* Chapter Banner */}
           <div className="space-y-2 pb-4 border-b border-[var(--border-color)]">
             <div className="flex items-center space-x-2">
@@ -130,7 +132,7 @@ export default function ChapterPage() {
             </p>
           </div>
 
-          {/* Learning Objectives Box */}
+          {/* Learning Objectives Card */}
           <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2.5 shadow-sm">
             <h4 className="font-bold text-xs text-[var(--brand-primary)] uppercase tracking-wider font-mono flex items-center space-x-1.5">
               <Sparkles className="w-3.5 h-3.5" />
@@ -149,7 +151,10 @@ export default function ChapterPage() {
           {/* Lesson Content Sections */}
           <div className="space-y-5 text-xs text-[var(--text-primary)] leading-relaxed">
             {currentChapter.sections.map((sec) => (
-              <div key={sec.id} className="space-y-2.5 p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm">
+              <div
+                key={sec.id}
+                className="space-y-2.5 p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm"
+              >
                 <h3 className="text-sm font-bold text-[var(--text-primary)] font-display flex items-center space-x-2">
                   <span className="w-1.5 h-4 rounded-full bg-[var(--brand-primary)]" />
                   <span>{sec.title}</span>
@@ -162,10 +167,10 @@ export default function ChapterPage() {
                   <div className="pt-2">
                     <button
                       onClick={() => triggerRunCommand(sec.terminalSnippet!)}
-                      className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-[var(--brand-light)] hover:brightness-95 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 text-xs font-mono font-bold transition-all shadow-sm"
+                      className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-xl bg-[var(--brand-light)] hover:brightness-95 text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 text-xs font-mono font-bold transition-all shadow-sm group"
                     >
-                      <Zap className="w-3.5 h-3.5" />
-                      <span>⚡ 1-Click Run: {sec.terminalSnippet}</span>
+                      <Zap className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                      <span>⚡ 1-Click Run in Terminal: {sec.terminalSnippet}</span>
                     </button>
                   </div>
                 )}
@@ -227,15 +232,36 @@ export default function ChapterPage() {
             )}
           </div>
         </div>
+      </main>
 
-        {/* Right Embedded Interactive Terminal (5 cols) */}
-        <div className="lg:col-span-5 h-full flex flex-col overflow-hidden">
+      {/* 3. Right Sticky / Pinned Live Terminal Column */}
+      <section
+        className={`w-full lg:w-[460px] xl:w-[520px] shrink-0 flex flex-col bg-[var(--bg-card)] border-t lg:border-t-0 lg:border-l border-[var(--border-color)] transition-all z-30 shadow-xl ${
+          isMobileTerminalExpanded ? 'h-80 lg:h-full' : 'h-11 lg:h-full'
+        }`}
+      >
+        {/* Mobile Header Collapse Toggle */}
+        <div
+          className="lg:hidden flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] cursor-pointer select-none"
+          onClick={() => setIsMobileTerminalExpanded(!isMobileTerminalExpanded)}
+        >
+          <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)] font-display">
+            <TerminalIcon className="w-4 h-4 text-[var(--brand-primary)]" />
+            <span>Interactive Docker Terminal (Sticky)</span>
+          </div>
+          <button className="p-1 text-[var(--text-muted)]">
+            {isMobileTerminalExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Terminal Component - Always pinned and fully active */}
+        <div className="flex-1 flex flex-col overflow-hidden p-2 lg:p-2.5">
           <DockerTerminal
             className="h-full"
             onCommandExecuted={(cmd) => setLastExecutedCommand(cmd)}
           />
         </div>
-      </div>
+      </section>
 
       {/* Quiz Modal */}
       <QuizModal

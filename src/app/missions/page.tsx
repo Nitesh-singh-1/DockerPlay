@@ -11,6 +11,8 @@ import {
   Award,
   Zap,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Terminal,
 } from 'lucide-react';
 import { DOCKER_MISSIONS } from '@/data/missions';
@@ -24,6 +26,7 @@ export default function MissionsPage() {
   const [progress, setProgress] = useState<UserProgress>(ProgressManager.load());
   const [selectedMission, setSelectedMission] = useState<Mission>(DOCKER_MISSIONS[0]);
   const [state, setState] = useState(() => getDockerEngine().getState());
+  const [isMobileTerminalExpanded, setIsMobileTerminalExpanded] = useState(true);
 
   useEffect(() => {
     const unsub = getDockerEngine().subscribe((s) => {
@@ -40,10 +43,10 @@ export default function MissionsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden transition-colors">
       {/* Left Mission Rail */}
-      <aside className="w-full md:w-80 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm">
-        <div className="p-4 border-b border-[var(--border-color)]">
+      <aside className="w-full lg:w-72 xl:w-80 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm max-h-48 lg:max-h-full">
+        <div className="p-3.5 border-b border-[var(--border-color)]">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono flex items-center space-x-2">
               <Target className="w-3.5 h-3.5 text-[var(--brand-primary)]" />
@@ -55,7 +58,7 @@ export default function MissionsPage() {
           </div>
         </div>
 
-        <nav className="p-2 space-y-1.5">
+        <nav className="p-2 space-y-1.5 overflow-y-auto">
           {DOCKER_MISSIONS.map((m) => {
             const isSelected = selectedMission.id === m.id;
             const isDone = progress.completedMissions.includes(m.id);
@@ -88,10 +91,9 @@ export default function MissionsPage() {
         </nav>
       </aside>
 
-      {/* Main Mission Details & Terminal Split */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-2.5 p-2.5 overflow-hidden">
-        {/* Mission Objectives & Guidance (7 cols) */}
-        <div className="lg:col-span-7 h-full overflow-y-auto p-6 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-6 shadow-sm">
+      {/* Main Mission Objectives (Independently Scrollable) */}
+      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6 pb-24 lg:pb-8">
           {/* Mission Header */}
           <div className="space-y-2 pb-4 border-b border-[var(--border-color)]">
             <div className="flex items-center space-x-2">
@@ -109,7 +111,7 @@ export default function MissionsPage() {
           </div>
 
           {/* Target Goal */}
-          <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2">
+          <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2 shadow-sm">
             <h4 className="font-bold text-xs text-[var(--brand-primary)] uppercase tracking-wider font-mono flex items-center space-x-1.5">
               <Target className="w-3.5 h-3.5" />
               <span>Mission Goal</span>
@@ -128,7 +130,7 @@ export default function MissionsPage() {
               {selectedMission.objectives.map((obj, i) => (
                 <div
                   key={i}
-                  className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-start space-x-2.5 text-xs shadow-sm"
+                  className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-start space-x-2.5 text-xs shadow-sm"
                 >
                   <ChevronRight className="w-4 h-4 text-[var(--brand-primary)] shrink-0 mt-0.5" />
                   <span className="text-[var(--text-primary)] leading-relaxed">{obj.description}</span>
@@ -155,9 +157,9 @@ export default function MissionsPage() {
             </div>
           )}
 
-          {/* Solution Steps if available */}
+          {/* 1-Click Solution Steps */}
           {selectedMission.solutionSteps && selectedMission.solutionSteps.length > 0 && (
-            <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2">
+            <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-2 shadow-sm">
               <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider block font-bold">
                 1-Click Quick Execution Steps:
               </span>
@@ -166,7 +168,7 @@ export default function MissionsPage() {
                   <button
                     key={sIdx}
                     onClick={() => triggerRunCommand(step)}
-                    className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-[var(--bg-card)] text-[var(--brand-primary)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs font-mono font-semibold transition-all shadow-sm"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] text-[var(--brand-primary)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs font-mono font-semibold transition-all shadow-sm"
                   >
                     <Zap className="w-3.5 h-3.5" />
                     <span>{step}</span>
@@ -177,7 +179,7 @@ export default function MissionsPage() {
           )}
 
           {/* Reward Pill */}
-          <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 text-slate-950 font-bold flex items-center justify-center shadow-md">
                 <Award className="w-5 h-5" />
@@ -192,12 +194,31 @@ export default function MissionsPage() {
             </span>
           </div>
         </div>
+      </main>
 
-        {/* Live Terminal (5 cols) */}
-        <div className="lg:col-span-5 h-full flex flex-col overflow-hidden">
+      {/* Sticky Right Terminal */}
+      <section
+        className={`w-full lg:w-[460px] xl:w-[520px] shrink-0 flex flex-col bg-[var(--bg-card)] border-t lg:border-t-0 lg:border-l border-[var(--border-color)] transition-all z-30 shadow-xl ${
+          isMobileTerminalExpanded ? 'h-80 lg:h-full' : 'h-11 lg:h-full'
+        }`}
+      >
+        <div
+          className="lg:hidden flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] cursor-pointer select-none"
+          onClick={() => setIsMobileTerminalExpanded(!isMobileTerminalExpanded)}
+        >
+          <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)] font-display">
+            <Terminal className="w-4 h-4 text-[var(--brand-primary)]" />
+            <span>Interactive Docker Terminal (Sticky)</span>
+          </div>
+          <button className="p-1 text-[var(--text-muted)]">
+            {isMobileTerminalExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col overflow-hidden p-2 lg:p-2.5">
           <DockerTerminal className="h-full" />
         </div>
-      </div>
+      </section>
     </div>
   );
 }
