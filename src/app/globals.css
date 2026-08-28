@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   CSS DESIGN SYSTEM: LIGHT & DARK MODES WITH BRAND COLOR THEMES
+   (Clean Sky Blue, Google Cloud, WhatsApp Emerald, Meta Blue, Midnight)
+   ========================================================================== */
+
+:root,
+html.light {
+  --bg-page: #f8fafc;
+  --bg-subtle: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-header: rgba(255, 255, 255, 0.9);
+  --bg-terminal: #0f172a;
+  --bg-terminal-header: #090d16;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-highlight: rgba(2, 132, 199, 0.3);
+
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  --panel-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08);
+
+  /* Brand Default: Clean Sky Blue */
+  --brand-primary: #0284c7;
+  --brand-accent: #0ea5e9;
+  --brand-light: #e0f2fe;
+  --brand-text: #0369a1;
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+}
+
+html.dark {
+  --bg-page: #070b14;
+  --bg-subtle: #0b1120;
+  --bg-card: #0f172a;
+  --bg-card-hover: #1e293b;
+  --bg-header: rgba(11, 17, 32, 0.85);
+  --bg-terminal: #090d16;
+  --bg-terminal-header: #05080f;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+
+  --border-color: #1e293b;
+  --border-subtle: #111827;
+  --border-highlight: rgba(56, 189, 248, 0.3);
+
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --panel-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+
+  --brand-primary: #38bdf8;
+  --brand-accent: #0ea5e9;
+  --brand-light: #082f49;
+  --brand-text: #7dd3fc;
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+}
+
+/* ==========================================================================
+   BRAND COLOR OVERRIDES: GOOGLE, WHATSAPP, META, SKY, MIDNIGHT
+   ========================================================================== */
+
+/* 1. Google Cloud / Google Tech Theme */
+[data-brand="google"].light {
+  --brand-primary: #1a73e8;
+  --brand-accent: #4285f4;
+  --brand-light: #e8f0fe;
+  --brand-text: #174ea6;
+  --brand-gradient: linear-gradient(135deg, #1a73e8 0%, #4285f4 50%, #34a853 100%);
+  --bg-page: #f8fafd;
+  --border-highlight: rgba(26, 115, 232, 0.3);
+}
+
+[data-brand="google"].dark {
+  --brand-primary: #8ab4f8;
+  --brand-accent: #4285f4;
+  --brand-light: #172b4d;
+  --brand-text: #aecbfa;
+  --brand-gradient: linear-gradient(135deg, #4285f4 0%, #8ab4f8 100%);
+  --border-highlight: rgba(138, 180, 248, 0.3);
+}
+
+/* 2. WhatsApp Green Theme */
+[data-brand="whatsapp"].light {
+  --brand-primary: #128c7e;
+  --brand-accent: #25d366;
+  --brand-light: #dcf8c6;
+  --brand-text: #075e54;
+  --brand-gradient: linear-gradient(135deg, #075e54 0%, #128c7e 50%, #25d366 100%);
+  --bg-page: #f4f7f6;
+  --border-highlight: rgba(18, 140, 126, 0.3);
+}
+
+[data-brand="whatsapp"].dark {
+  --brand-primary: #25d366;
+  --brand-accent: #128c7e;
+  --brand-light: #052e23;
+  --brand-text: #4ade80;
+  --brand-gradient: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
+  --border-highlight: rgba(37, 211, 102, 0.3);
+}
+
+/* 3. Meta Blue Theme */
+[data-brand="meta"].light {
+  --brand-primary: #0866ff;
+  --brand-accent: #0080fb;
+  --brand-light: #e7f3ff;
+  --brand-text: #0052cc;
+  --brand-gradient: linear-gradient(135deg, #0866ff 0%, #0080fb 100%);
+  --bg-page: #f0f2f5;
+  --border-highlight: rgba(8, 102, 255, 0.3);
+}
+
+[data-brand="meta"].dark {
+  --brand-primary: #4799eb;
+  --brand-accent: #0866ff;
+  --brand-light: #0d2a4a;
+  --brand-text: #70b4f8;
+  --brand-gradient: linear-gradient(135deg, #0866ff 0%, #4799eb 100%);
+  --border-highlight: rgba(71, 153, 235, 0.3);
+}
+
+/* 4. Clean Sky Blue Theme */
+[data-brand="sky"].light {
+  --brand-primary: #0284c7;
+  --brand-accent: #0ea5e9;
+  --brand-light: #e0f2fe;
+  --brand-text: #0369a1;
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+  --bg-page: #f8fafc;
+}
+
+[data-brand="sky"].dark {
+  --brand-primary: #38bdf8;
+  --brand-accent: #0ea5e9;
+  --brand-light: #082f49;
+  --brand-text: #7dd3fc;
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+}
+
+/* 5. Midnight Theme */
+[data-brand="midnight"] {
+  --brand-primary: #38bdf8;
+  --brand-accent: #818cf8;
+  --brand-light: #1e293b;
+  --brand-text: #93c5fd;
+  --brand-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+}
+
+/* ==========================================================================
+   GLOBAL TYPOGRAPHY & BASE STYLES
+   ========================================================================== */
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-outfit), var(--font-sans), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+code, pre, .font-mono-code {
+  font-family: var(--font-mono), Consolas, monospace;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Surface Utility Classes */
+.bg-app-page {
+  background-color: var(--bg-page);
+}
+
+.bg-app-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.bg-app-header {
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.text-app-primary {
+  color: var(--text-primary);
+}
+
+.text-app-secondary {
+  color: var(--text-secondary);
+}
+
+.text-app-muted {
+  color: var(--text-muted);
+}
+
+.border-app {
+  border-color: var(--border-color);
+}
+
+.border-app-highlight {
+  border-color: var(--border-highlight);
+}
+
+/* Dynamic Mesh Grid Background */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+}
+
+html.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
