@@ -15,6 +15,7 @@ import {
   Zap,
   ChevronDown,
   ChevronUp,
+  Columns,
 } from 'lucide-react';
 import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
 import { getDockerEngine } from '@/lib/simulator/DockerEngine';
@@ -38,6 +39,7 @@ export default function ChapterPage() {
   const [lastExecutedCommand, setLastExecutedCommand] = useState<string>('');
   const [progress, setProgress] = useState(() => ProgressManager.load());
   const [isMobileTerminalExpanded, setIsMobileTerminalExpanded] = useState(true);
+  const [terminalWidth, setTerminalWidth] = useState<'normal' | 'wide'>('normal');
 
   useEffect(() => {
     const unsub = engine.subscribe((newState) => {
@@ -62,10 +64,10 @@ export default function ChapterPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-page)] overflow-hidden transition-colors">
-      {/* 1. Left Curriculum Navigation Rail (Desktop & Tablet) */}
-      <aside className="w-full lg:w-64 xl:w-72 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm max-h-48 lg:max-h-full">
-        <div className="p-3.5 border-b border-[var(--border-color)]">
+    <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] min-h-0 bg-[var(--bg-page)] overflow-hidden transition-colors">
+      {/* 1. Left Curriculum Navigation Rail */}
+      <aside className="w-full lg:w-64 xl:w-72 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col shrink-0 overflow-y-auto shadow-sm max-h-40 lg:max-h-full">
+        <div className="p-3.5 border-b border-[var(--border-color)] shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono flex items-center space-x-2">
               <BookOpen className="w-3.5 h-3.5 text-[var(--brand-primary)]" />
@@ -77,7 +79,7 @@ export default function ChapterPage() {
           </div>
         </div>
 
-        <nav className="p-2 space-y-1 overflow-y-auto">
+        <nav className="p-2 space-y-1 overflow-y-auto flex-1">
           {CURRICULUM_CHAPTERS.map((ch) => {
             const isSelected = ch.id === currentChapter.id;
             const isDone = progress.completedChapters.includes(ch.id);
@@ -105,8 +107,8 @@ export default function ChapterPage() {
         </nav>
       </aside>
 
-      {/* 2. Center Independently Scrollable Lesson Column */}
-      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-7 space-y-6">
+      {/* 2. Center Independently Scrollable Lesson Reader */}
+      <main className="flex-1 min-w-0 min-h-0 h-full overflow-y-auto p-4 sm:p-6 lg:p-7 space-y-6">
         <div className="max-w-4xl mx-auto space-y-6 pb-24 lg:pb-8">
           {/* Chapter Banner */}
           <div className="space-y-2 pb-4 border-b border-[var(--border-color)]">
@@ -236,10 +238,27 @@ export default function ChapterPage() {
 
       {/* 3. Right Sticky / Pinned Live Terminal Column */}
       <section
-        className={`w-full lg:w-[460px] xl:w-[520px] shrink-0 flex flex-col bg-[var(--bg-card)] border-t lg:border-t-0 lg:border-l border-[var(--border-color)] transition-all z-30 shadow-xl ${
-          isMobileTerminalExpanded ? 'h-80 lg:h-full' : 'h-11 lg:h-full'
-        }`}
+        className={`shrink-0 min-h-0 flex flex-col bg-[var(--bg-card)] border-t lg:border-t-0 lg:border-l border-[var(--border-color)] transition-all z-20 shadow-xl ${
+          terminalWidth === 'wide' ? 'lg:w-[620px] xl:w-[680px]' : 'lg:w-[460px] xl:w-[500px]'
+        } ${isMobileTerminalExpanded ? 'h-80 lg:h-full' : 'h-11 lg:h-full'}`}
       >
+        {/* Top Width & Mobile Header Controls */}
+        <div className="hidden lg:flex items-center justify-between px-3 py-1.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] text-[11px] text-[var(--text-muted)] select-none">
+          <div className="flex items-center space-x-1.5 font-bold text-[var(--text-primary)] font-display">
+            <TerminalIcon className="w-3.5 h-3.5 text-[var(--brand-primary)]" />
+            <span>Interactive Terminal Panel</span>
+          </div>
+
+          <button
+            onClick={() => setTerminalWidth(terminalWidth === 'normal' ? 'wide' : 'normal')}
+            className="flex items-center space-x-1 px-2 py-0.5 rounded-md hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-mono text-[10px]"
+            title="Toggle Terminal Panel Width"
+          >
+            <Columns className="w-3 h-3 text-[var(--brand-primary)]" />
+            <span>Width: {terminalWidth === 'normal' ? 'Normal' : 'Wide'}</span>
+          </button>
+        </div>
+
         {/* Mobile Header Collapse Toggle */}
         <div
           className="lg:hidden flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] cursor-pointer select-none"
@@ -247,17 +266,17 @@ export default function ChapterPage() {
         >
           <div className="flex items-center space-x-2 text-xs font-bold text-[var(--text-primary)] font-display">
             <TerminalIcon className="w-4 h-4 text-[var(--brand-primary)]" />
-            <span>Interactive Docker Terminal (Sticky)</span>
+            <span>Interactive Docker Terminal</span>
           </div>
           <button className="p-1 text-[var(--text-muted)]">
             {isMobileTerminalExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Terminal Component - Always pinned and fully active */}
-        <div className="flex-1 flex flex-col overflow-hidden p-2 lg:p-2.5">
+        {/* Terminal Component */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-2 lg:p-2.5">
           <DockerTerminal
-            className="h-full"
+            className="h-full min-h-0"
             onCommandExecuted={(cmd) => setLastExecutedCommand(cmd)}
           />
         </div>
