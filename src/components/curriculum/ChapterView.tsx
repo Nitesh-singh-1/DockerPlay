@@ -335,7 +335,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
 
       {/* 3. RIGHT PANE: Interactive Terminal (Desktop side-by-side / Mobile Full view) */}
       <section
-        className={`w-full xl:w-[460px] 2xl:w-[520px] h-full shrink-0 bg-[var(--bg-card)] border-l border-[var(--border-color)] flex flex-col overflow-hidden shadow-2xl z-10 ${
+        className={`w-full xl:w-[480px] 2xl:w-[540px] h-full shrink-0 bg-[var(--bg-card)] border-l border-[var(--border-color)] flex flex-col overflow-hidden shadow-2xl z-10 ${
           mobileTab === 'terminal' ? 'flex' : 'hidden xl:flex'
         } ${!isTerminalOpen && 'xl:hidden'}`}
       >

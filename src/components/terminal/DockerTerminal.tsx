@@ -175,23 +175,25 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   const terminalBody = (
     <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden bg-[#080d1a] text-slate-200">
       {/* Terminal Title Bar */}
-      <div className="shrink-0 h-11 flex items-center justify-between px-3.5 sm:px-4 bg-slate-950/95 border-b border-slate-800 text-slate-400 select-none backdrop-blur-md">
-        <div className="flex items-center space-x-2.5">
-          <div className="flex space-x-1.5 mr-1">
+      <div className="shrink-0 h-11 flex items-center justify-between px-3 sm:px-4 bg-slate-950/95 border-b border-slate-800 text-slate-400 select-none backdrop-blur-md">
+        {/* Left: Window Controls + Title */}
+        <div className="flex items-center space-x-2 shrink-0 min-w-0">
+          <div className="flex space-x-1.5 mr-0.5 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" />
             <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm" />
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
           </div>
-          <TerminalIcon className="w-4 h-4 text-cyan-400" />
-          <span className="font-bold text-slate-100 text-xs font-display tracking-wide">
-            Docker CLI Terminal
+          <TerminalIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="font-bold text-slate-100 text-xs font-display tracking-wide whitespace-nowrap">
+            Docker Terminal
           </span>
-          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-            Simulator v27.1
+          <span className="hidden sm:inline-block text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40 shrink-0">
+            v27.1
           </span>
         </div>
 
-        <div className="flex items-center space-x-1.5">
+        {/* Right: Actions */}
+        <div className="flex items-center space-x-1 shrink-0">
           <button
             onClick={() => setShowBeginnerMode(!showBeginnerMode)}
             className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] transition-colors ${
@@ -201,31 +203,29 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
             }`}
             title="Toggle Beginner Explanations"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Explanations</span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xl:inline text-[10.5px]">Explanations</span>
           </button>
 
           <button
             onClick={copyAllOutput}
-            className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-[11px]"
             title="Copy Terminal Output"
           >
             {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">Copy</span>
           </button>
 
           <button
             onClick={() => setHistory([])}
-            className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors text-[11px]"
             title="Clear Console"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Clear</span>
           </button>
 
           <button
             onClick={() => setIsMaximized(!isMaximized)}
-            className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors text-[11px]"
             title={isMaximized ? 'Exit Fullscreen (Esc)' : 'Maximize Terminal'}
           >
             {isMaximized ? <Minimize2 className="w-3.5 h-3.5 text-cyan-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
