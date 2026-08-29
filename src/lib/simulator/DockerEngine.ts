@@ -45,6 +45,169 @@ export class DockerEngine {
     this.notify();
   }
 
+  public loadPreset(presetName: string): void {
+    if (presetName === 'crash-loop') {
+      const id = this.generateId();
+      this.state.containers[id] = {
+        id,
+        name: 'auth-api',
+        image: 'node:22-alpine',
+        imageId: 'img-node-22',
+        command: 'node server.js',
+        created: Date.now() - 60000,
+        status: 'exited',
+        health: 'unhealthy',
+        exitCode: 1,
+        ports: [],
+        networks: {
+          bridge: {
+            ipAddress: '172.17.0.4',
+            gateway: '172.17.0.1',
+            aliases: ['auth-api'],
+          },
+        },
+        mounts: [],
+        environment: {},
+        labels: {},
+        logs: [
+          { timestamp: new Date().toISOString(), stream: 'stdout', message: 'Initializing Authentication Service v2.4...' },
+          { timestamp: new Date().toISOString(), stream: 'stderr', message: 'FATAL: Missing required environment variable DB_HOST' },
+          { timestamp: new Date().toISOString(), stream: 'stderr', message: 'Process crashed with code 1' },
+        ],
+        resources: {
+          memoryUsageMb: 0,
+          cpuPercent: 0,
+          networkRxKb: 0,
+          networkTxKb: 0,
+          processCount: 0,
+        },
+        restartPolicy: 'no',
+      };
+    } else if (presetName === 'port-mismatch') {
+      const id = this.generateId();
+      this.state.containers[id] = {
+        id,
+        name: 'web-app',
+        image: 'nginx:latest',
+        imageId: 'img-nginx',
+        command: 'nginx -g "daemon off;"',
+        created: Date.now() - 120000,
+        status: 'running',
+        health: 'healthy',
+        exitCode: 0,
+        ports: [{ hostPort: 8080, containerPort: 8080, protocol: 'tcp' }],
+        networks: {
+          bridge: {
+            ipAddress: '172.17.0.5',
+            gateway: '172.17.0.1',
+            aliases: ['web-app'],
+          },
+        },
+        mounts: [],
+        environment: {},
+        labels: {},
+        logs: [
+          { timestamp: new Date().toISOString(), stream: 'stdout', message: 'Configuration loaded successfully.' },
+          { timestamp: new Date().toISOString(), stream: 'stdout', message: 'Nginx 1.27 listening on internal port 80/tcp' },
+        ],
+        resources: {
+          memoryUsageMb: 15,
+          cpuPercent: 0.2,
+          networkRxKb: 12,
+          networkTxKb: 8,
+          processCount: 2,
+        },
+        restartPolicy: 'no',
+      };
+    } else if (presetName === 'network-split') {
+      if (!this.state.networks['store-net']) {
+        this.state.networks['store-net'] = {
+          id: `net-${this.generateId(8)}`,
+          name: 'store-net',
+          driver: 'bridge',
+          subnet: '172.28.0.0/16',
+          gateway: '172.28.0.1',
+          containers: [],
+          internal: false,
+        };
+      }
+      const frontId = this.generateId();
+      this.state.containers[frontId] = {
+        id: frontId,
+        name: 'storefront',
+        image: 'node:22-alpine',
+        imageId: 'img-node-22',
+        command: 'npm start',
+        created: Date.now() - 180000,
+        status: 'running',
+        health: 'healthy',
+        exitCode: 0,
+        ports: [{ hostPort: 3000, containerPort: 3000, protocol: 'tcp' }],
+        networks: {
+          'store-net': {
+            ipAddress: '172.28.0.2',
+            gateway: '172.28.0.1',
+            aliases: ['storefront'],
+          },
+        },
+        mounts: [],
+        environment: { API_URL: 'http://order-api:5000' },
+        labels: {},
+        logs: [
+          { timestamp: new Date().toISOString(), stream: 'stdout', message: 'Storefront React UI listening on :3000' },
+          { timestamp: new Date().toISOString(), stream: 'stderr', message: 'getaddrinfo ENOTFOUND order-api: connection failed' },
+        ],
+        resources: {
+          memoryUsageMb: 45,
+          cpuPercent: 0.5,
+          networkRxKb: 20,
+          networkTxKb: 10,
+          processCount: 3,
+        },
+        restartPolicy: 'no',
+      };
+      this.state.networks['store-net'].containers.push(frontId);
+
+      const orderId = this.generateId();
+      this.state.containers[orderId] = {
+        id: orderId,
+        name: 'order-api',
+        image: 'node:22-alpine',
+        imageId: 'img-node-22',
+        command: 'node order-server.js',
+        created: Date.now() - 180000,
+        status: 'running',
+        health: 'healthy',
+        exitCode: 0,
+        ports: [{ hostPort: 5000, containerPort: 5000, protocol: 'tcp' }],
+        networks: {
+          bridge: {
+            ipAddress: '172.17.0.6',
+            gateway: '172.17.0.1',
+            aliases: ['order-api'],
+          },
+        },
+        mounts: [],
+        environment: {},
+        labels: {},
+        logs: [
+          { timestamp: new Date().toISOString(), stream: 'stdout', message: 'Order REST API running on port 5000/tcp' },
+        ],
+        resources: {
+          memoryUsageMb: 38,
+          cpuPercent: 0.3,
+          networkRxKb: 8,
+          networkTxKb: 4,
+          processCount: 2,
+        },
+        restartPolicy: 'no',
+      };
+      this.state.networks['bridge'].containers.push(orderId);
+    }
+    this.recordEvent('daemon', 'preset_loaded', 'docker-daemon', presetName, { preset: presetName });
+    this.notify();
+  }
+
   private generateId(length: number = 12): string {
     const chars = '0123456789abcdef';
     let result = '';

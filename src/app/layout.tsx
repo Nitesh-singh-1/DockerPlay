@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
@@ -27,6 +27,12 @@ export const metadata: Metadata = {
   title: 'DockerPlay — Interactive Docker Learning Playground',
   description:
     'A visual, hands-on Docker learning playground where you can build images, run containers, bridge networks, mount volumes, and master Docker interactively in your browser.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
