@@ -1611,27 +1611,70 @@ export class DockerEngine {
         };
       }
 
-      // Check if target matches another container on the SAME user-defined network
-      const containerNetworks = Object.keys(container.networks);
-      let targetContainer: Container | undefined;
-      let sharedNetworkName: string | undefined;
+      // Find target container by name or alias or IP
+      const targetContainer = Object.values(this.state.containers).find(
+        (c) =>
+          c.status === 'running' &&
+          (c.name === hostTarget ||
+            c.id.startsWith(hostTarget) ||
+            Object.values(c.networks).some(
+              (n) => n.aliases.includes(hostTarget) || n.ipAddress === hostTarget
+            ))
+      );
 
-      for (const netName of containerNetworks) {
-        const net = this.state.networks[netName];
-        if (net) {
-          const match = Object.values(this.state.containers).find(
-            (c) => c.status === 'running' && (c.name === hostTarget || c.networks[netName]?.ipAddress === hostTarget) && c.networks[netName]
-          );
-          if (match) {
-            targetContainer = match;
-            sharedNetworkName = netName;
-            break;
-          }
-        }
+      if (!targetContainer) {
+        return {
+          stdout: '',
+          stderr: `${isCurl ? 'curl: (6) Could not resolve host:' : 'ping: bad address'} '${hostTarget}'\n\nHint: Container '${hostTarget}' is not running or does not exist.`,
+          exitCode: 6,
+        };
       }
 
-      // If on default 'bridge' network, container name DNS resolution is disabled by Docker design
-      if (sharedNetworkName === 'bridge' && targetContainer && targetContainer.name === hostTarget) {
+      // Check all shared networks between source container and target container
+      const sourceNets = Object.keys(container.networks);
+      const targetNets = Object.keys(targetContainer.networks);
+      const sharedNets = sourceNets.filter((net) => targetNets.includes(net));
+
+      if (sharedNets.length === 0) {
+        return {
+          stdout: '',
+          stderr: `${isCurl ? 'curl: (7) Failed to connect to host' : 'ping: Destination Host Unreachable'}: '${hostTarget}'\n\n💡 Network Isolation:\nContainer '${container.name}' and '${targetContainer.name}' are on separate, isolated networks and cannot communicate.\nAttach them to the same network:\n  docker network connect <network-name> ${container.name}\n  docker network connect <network-name> ${targetContainer.name}`,
+          exitCode: 1,
+        };
+      }
+
+      // Look for any user-defined network (non-default bridge)
+      const userDefinedSharedNet = sharedNets.find((net) => net !== 'bridge');
+
+      if (userDefinedSharedNet) {
+        // SUCCESS: Container name DNS resolution succeeds on user-defined bridge network!
+        const targetIp = targetContainer.networks[userDefinedSharedNet]?.ipAddress || '172.20.0.3';
+        if (isCurl) {
+          return {
+            stdout: `HTTP/1.1 200 OK\nServer: ${targetContainer.image}\nContent-Type: application/json\n\n{"status":"ok","service":"${targetContainer.name}","ip":"${targetIp}","network":"${userDefinedSharedNet}"}`,
+            stderr: '',
+            exitCode: 0,
+          };
+        }
+        return {
+          stdout: `PING ${hostTarget} (${targetIp}): 56 data bytes\n64 bytes from ${hostTarget} (${targetIp}): seq=0 ttl=64 time=0.215 ms\n64 bytes from ${hostTarget} (${targetIp}): seq=1 ttl=64 time=0.198 ms\n--- ${hostTarget} ping statistics ---\n2 packets transmitted, 2 packets received, 0% packet loss`,
+          stderr: '',
+          exitCode: 0,
+        };
+      }
+
+      // If the ONLY shared network is the default 'bridge' network, container name DNS fails by Docker design
+      if (sharedNets.includes('bridge')) {
+        // If user pinged by IP address directly, it succeeds on default bridge
+        const targetIp = targetContainer.networks['bridge']?.ipAddress;
+        if (hostTarget === targetIp) {
+          return {
+            stdout: `PING ${hostTarget} (${targetIp}): 56 data bytes\n64 bytes from ${hostTarget} (${targetIp}): seq=0 ttl=64 time=0.280 ms\n--- ${hostTarget} ping statistics ---\n1 packets transmitted, 1 packets received, 0% packet loss`,
+            stderr: '',
+            exitCode: 0,
+          };
+        }
+
         return {
           stdout: '',
           stderr: `${isCurl ? 'curl: (6) Could not resolve host:' : 'ping: bad address'} '${hostTarget}'\n\n💡 Docker Explanation:\nContainers on the default 'bridge' network cannot resolve each other by container name.\nTo enable automatic DNS service discovery, create and attach them to a user-defined network:\n  docker network create app-net\n  docker network connect app-net ${container.name}\n  docker network connect app-net ${targetContainer.name}`,
@@ -1639,26 +1682,9 @@ export class DockerEngine {
         };
       }
 
-      if (targetContainer && sharedNetworkName) {
-        const targetIp = targetContainer.networks[sharedNetworkName]?.ipAddress;
-        if (isCurl) {
-          return {
-            stdout: `HTTP/1.1 200 OK\nServer: ${targetContainer.image}\nContent-Type: application/json\n\n{"status":"ok","service":"${targetContainer.name}","ip":"${targetIp}"}`,
-            stderr: '',
-            exitCode: 0,
-          };
-        }
-        return {
-          stdout: `PING ${hostTarget} (${targetIp}): 56 data bytes\n64 bytes from ${hostTarget} (${targetIp}): seq=0 ttl=64 time=0.215 ms\n--- ${hostTarget} ping statistics ---\n1 packets transmitted, 1 packets received, 0% packet loss`,
-          stderr: '',
-          exitCode: 0,
-        };
-      }
-
-      // If host not found on any shared network
       return {
         stdout: '',
-        stderr: `${isCurl ? 'curl: (6) Could not resolve host:' : 'ping: bad address'} '${hostTarget}'\n\nHint: Ensure both containers are running and attached to the same user-defined network.`,
+        stderr: `${isCurl ? 'curl: (6) Could not resolve host:' : 'ping: bad address'} '${hostTarget}'`,
         exitCode: 6,
       };
     }

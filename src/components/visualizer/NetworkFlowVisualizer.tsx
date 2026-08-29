@@ -82,12 +82,6 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
             ))
       );
 
-      // Check shared network
-      const sourceNets = Object.keys(sourceContainer.networks);
-      const sharedNet = targetContainer
-        ? Object.keys(targetContainer.networks).find((net) => sourceNets.includes(net))
-        : undefined;
-
       if (!targetContainer) {
         setTraceState({
           isRunning: false,
@@ -99,7 +93,12 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
         return;
       }
 
-      if (!sharedNet) {
+      // Check shared networks
+      const sourceNets = Object.keys(sourceContainer.networks);
+      const targetNets = Object.keys(targetContainer.networks);
+      const sharedNets = sourceNets.filter((net) => targetNets.includes(net));
+
+      if (sharedNets.length === 0) {
         setTraceState({
           isRunning: false,
           step: 2,
@@ -110,7 +109,11 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
         return;
       }
 
-      if (sharedNet === 'bridge') {
+      // Prioritize user-defined networks (which support DNS)
+      const customSharedNet = sharedNets.find((net) => net !== 'bridge');
+      const activeNet = customSharedNet || 'bridge';
+
+      if (!customSharedNet && activeNet === 'bridge') {
         setTraceState({
           isRunning: false,
           step: 2,
@@ -122,7 +125,7 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
       }
 
       // Step 2: Route Packet
-      const resolvedIp = targetContainer.networks[sharedNet]?.ipAddress || '172.20.0.3';
+      const resolvedIp = targetContainer.networks[activeNet]?.ipAddress || '172.20.0.3';
       setTraceState({
         isRunning: true,
         step: 2,
@@ -143,9 +146,9 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
             {
               status: '200 OK',
               protocol,
-              source: `${sourceContainer.name} (${sourceContainer.networks[sharedNet]?.ipAddress})`,
+              source: `${sourceContainer.name} (${sourceContainer.networks[activeNet]?.ipAddress})`,
               destination: `${targetContainer.name}:${targetPort} (${resolvedIp})`,
-              network: `${sharedNet} (User-Defined Bridge)`,
+              network: `${activeNet} (User-Defined Bridge)`,
               dnsServer: '127.0.0.11 (Embedded Docker DNS)',
               latencyMs: 0.38,
             },
