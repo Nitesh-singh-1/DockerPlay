@@ -73,6 +73,28 @@ export class CommandParser {
         };
       }
 
+      // Check if user typed a Linux/shell tool (ping, curl, nc, which, cat, ls, etc.)
+      const linuxShellTools = ['ping', 'curl', 'nc', 'netcat', 'which', 'telnet', 'nslookup', 'dig', 'traceroute', 'ifconfig', 'ip', 'cat', 'ls', 'env', 'pwd', 'whoami', 'sh', 'bash'];
+      if (linuxShellTools.includes(firstToken)) {
+        return {
+          raw,
+          binary: 'docker',
+          command: firstToken,
+          flags: {},
+          positionalArgs: tokens.slice(1),
+          isValid: false,
+          validationError: `docker: '${firstToken}' is a Linux shell command, not a Docker CLI command.\n\n💡 How to run it in Docker:\nTo execute commands inside an isolated container, use 'docker exec':\n  docker exec <container_name> ${raw}\n\nExample:\n  docker exec api ${raw}\n  docker exec -it api sh`,
+          suggestedFix: `docker exec api ${raw}`,
+          educationalError: {
+            title: `Ran Linux tool "${firstToken}" directly on Docker CLI`,
+            entered: raw,
+            expected: `docker exec <container> ${raw}`,
+            example: `docker exec api ${raw}`,
+            why: `Tools like ping, curl, and nc run inside the container's isolated Linux namespace. The Docker CLI communicates with the Docker daemon using commands like 'docker exec', 'docker run', 'docker ps', etc.`,
+          },
+        };
+      }
+
       // Check if user made a typo for docker
       const closest = findClosestMatch(firstToken, ['docker', 'docker-compose']);
       return {

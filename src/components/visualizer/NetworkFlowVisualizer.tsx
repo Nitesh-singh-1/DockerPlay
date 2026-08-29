@@ -12,8 +12,14 @@ import {
   Radio,
   Sparkles,
   Info,
+  Zap,
+  HelpCircle,
+  Link as LinkIcon,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
 import { DockerState } from '@/types/docker';
+import { getDockerEngine } from '@/lib/simulator/DockerEngine';
 
 interface NetworkFlowVisualizerProps {
   state: DockerState;
@@ -24,8 +30,8 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
   const networks = Object.values(state.networks);
 
   const [sourceId, setSourceId] = useState<string>(containers[0]?.id || '');
-  const [destTarget, setDestTarget] = useState<string>('api:5000');
-  const [protocol, setProtocol] = useState<'HTTP' | 'PING' | 'TCP'>('HTTP');
+  const [destTarget, setDestTarget] = useState<string>('db:5432');
+  const [protocol, setProtocol] = useState<'HTTP' | 'PING' | 'TCP'>('TCP');
 
   const [traceState, setTraceState] = useState<{
     isRunning: boolean;
@@ -36,6 +42,7 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
     responseBody?: string;
     statusCode?: number;
     errorMsg?: string;
+    suggestedFix?: string;
   } | null>(null);
 
   const sourceContainer = state.containers[sourceId] || containers[0];
@@ -58,26 +65,36 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
           dnsSuccess: true,
           dnsResolvedIp: '127.0.0.1 (Loopback)',
           networkSuccess: false,
-          errorMsg: `Connection Refused: 'localhost' refers to ${sourceContainer.name}'s own internal loopback interface, not other containers on the host!`,
+          errorMsg: `Connection Refused: 'localhost' inside container "${sourceContainer.name}" refers to its OWN isolated loopback interface, not other containers or the host machine!`,
+          suggestedFix: `Use the destination container's name (e.g. 'db:5432') on a user-defined network instead of 'localhost'.`,
         });
         return;
       }
 
       // Find matching destination container
       const targetContainer = containers.find(
-        (c) => c.status === 'running' && (c.name === targetHostname || Object.values(c.networks).some((n) => n.aliases.includes(targetHostname) || n.ipAddress === targetHostname))
+        (c) =>
+          c.status === 'running' &&
+          (c.name === targetHostname ||
+            c.id.startsWith(targetHostname) ||
+            Object.values(c.networks).some(
+              (n) => n.aliases.includes(targetHostname) || n.ipAddress === targetHostname
+            ))
       );
 
       // Check shared network
       const sourceNets = Object.keys(sourceContainer.networks);
-      const sharedNet = targetContainer ? Object.keys(targetContainer.networks).find((net) => sourceNets.includes(net)) : undefined;
+      const sharedNet = targetContainer
+        ? Object.keys(targetContainer.networks).find((net) => sourceNets.includes(net))
+        : undefined;
 
       if (!targetContainer) {
         setTraceState({
           isRunning: false,
           step: 1,
           dnsSuccess: false,
-          errorMsg: `DNS Lookup Failed: Hostname '${targetHostname}' could not be resolved by Docker DNS. Does this container exist?`,
+          errorMsg: `DNS Lookup Failed: Hostname '${targetHostname}' could not be resolved by Docker DNS (127.0.0.11). Does container "${targetHostname}" exist and is it running?`,
+          suggestedFix: `Run 'docker ps' to see active container names, or start one using 'docker run -d --name ${targetHostname} ...'`,
         });
         return;
       }
@@ -87,7 +104,8 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
           isRunning: false,
           step: 2,
           dnsSuccess: false,
-          errorMsg: `Network Isolation: Container '${sourceContainer.name}' and '${targetContainer.name}' are NOT on the same Docker network! Attach them to the same custom bridge network.`,
+          errorMsg: `Network Isolation: Container '${sourceContainer.name}' and '${targetContainer.name}' are NOT on the same Docker network.`,
+          suggestedFix: `Connect them with: docker network connect <network-name> ${targetContainer.name}`,
         });
         return;
       }
@@ -97,13 +115,14 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
           isRunning: false,
           step: 2,
           dnsSuccess: false,
-          errorMsg: `DNS Resolution Unavailable: Default 'bridge' network does NOT support DNS lookup by container name. Create a custom network with 'docker network create app-net'.`,
+          errorMsg: `DNS Resolution Unavailable: The default 'bridge' network does NOT support automatic DNS lookup by container name (Docker by-design limitation).`,
+          suggestedFix: `Create a custom user-defined network: docker network create app-net && docker network connect app-net ${sourceContainer.name} && docker network connect app-net ${targetContainer.name}`,
         });
         return;
       }
 
       // Step 2: Route Packet
-      const resolvedIp = targetContainer.networks[sharedNet]?.ipAddress || '172.18.0.3';
+      const resolvedIp = targetContainer.networks[sharedNet]?.ipAddress || '172.20.0.3';
       setTraceState({
         isRunning: true,
         step: 2,
@@ -122,52 +141,113 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
           statusCode: 200,
           responseBody: JSON.stringify(
             {
-              status: 'success',
-              source: sourceContainer.name,
-              destination: `${targetContainer.name}:${targetPort}`,
-              network: sharedNet,
-              ip: resolvedIp,
-              latencyMs: 0.42,
+              status: '200 OK',
+              protocol,
+              source: `${sourceContainer.name} (${sourceContainer.networks[sharedNet]?.ipAddress})`,
+              destination: `${targetContainer.name}:${targetPort} (${resolvedIp})`,
+              network: `${sharedNet} (User-Defined Bridge)`,
+              dnsServer: '127.0.0.11 (Embedded Docker DNS)',
+              latencyMs: 0.38,
             },
             null,
             2
           ),
         });
-      }, 700);
-    }, 600);
+      }, 600);
+    }, 500);
+  };
+
+  const setPreset = (target: string, proto: 'HTTP' | 'PING' | 'TCP') => {
+    setDestTarget(target);
+    setProtocol(proto);
+  };
+
+  const handleCreateCustomNetwork = () => {
+    const engine = getDockerEngine();
+    engine.execute({
+      raw: 'docker network create app-net',
+      binary: 'docker',
+      command: 'network',
+      subcommand: 'create',
+      flags: {},
+      positionalArgs: ['app-net'],
+      isValid: true,
+    });
+    // Connect all existing containers to app-net
+    containers.forEach((c) => {
+      engine.execute({
+        raw: `docker network connect app-net ${c.name}`,
+        binary: 'docker',
+        command: 'network',
+        subcommand: 'connect',
+        flags: {},
+        positionalArgs: ['app-net', c.name],
+        isValid: true,
+      });
+    });
+  };
+
+  const isSharedCustomNetwork = () => {
+    if (!sourceContainer) return false;
+    const sourceNets = Object.keys(sourceContainer.networks).filter((n) => n !== 'bridge');
+    return sourceNets.length > 0;
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm transition-colors">
-      {/* Title */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)]">
+    <div className="flex flex-col h-full bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm transition-colors min-h-0">
+      {/* Title Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--bg-header)] border-b border-[var(--border-color)] shrink-0">
         <div className="flex items-center space-x-2">
           <Network className="w-4 h-4 text-[var(--brand-primary)]" />
           <h3 className="font-bold text-[var(--text-primary)] text-xs font-display tracking-wide">
             Live Network Flow & Embedded DNS Resolution Simulator
           </h3>
         </div>
-        <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[var(--brand-light)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/20">
-          DNS: 127.0.0.11
-        </span>
+        <div className="flex items-center space-x-1.5">
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--brand-light)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/20">
+            Embedded DNS: 127.0.0.11
+          </span>
+        </div>
       </div>
 
-      {/* Control Bar */}
-      <div className="p-4 bg-[var(--bg-subtle)] border-b border-[var(--border-color)] flex flex-wrap items-center gap-3 text-xs">
-        {/* Source Selector */}
+      {/* Quick Interactive Guide / How-To Banner */}
+      <div className="px-4 py-2.5 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent border-b border-[var(--border-color)] shrink-0 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center space-x-2">
-          <span className="text-[var(--text-secondary)] font-semibold">Source:</span>
+          <HelpCircle className="w-4 h-4 text-[var(--brand-primary)] shrink-0" />
+          <span className="text-slate-700 dark:text-slate-300 text-[11px] leading-snug">
+            <strong>How to test:</strong> Select a <em>Source</em> container, type a <em>Target</em> (e.g. <code>db:5432</code>), and click <strong>&quot;Send Request&quot;</strong> or run <code>docker exec api ping db</code> in the CLI!
+          </span>
+        </div>
+
+        {/* Quick Connect Helper Button */}
+        {!isSharedCustomNetwork() && containers.length >= 2 && (
+          <button
+            onClick={handleCreateCustomNetwork}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[var(--brand-primary)] text-white text-[10.5px] font-bold hover:brightness-110 shadow-sm transition-all shrink-0"
+            title="Create user-defined bridge network and attach all containers"
+          >
+            <Zap className="w-3 h-3" />
+            <span>Enable DNS (Create app-net)</span>
+          </button>
+        )}
+      </div>
+
+      {/* Control & Input Bar */}
+      <div className="p-3 bg-[var(--bg-subtle)] border-b border-[var(--border-color)] flex flex-wrap items-center gap-2 text-xs shrink-0">
+        {/* Source Selector */}
+        <div className="flex items-center space-x-1.5">
+          <span className="text-[var(--text-secondary)] font-semibold text-[11px]">From:</span>
           <select
             value={sourceId}
             onChange={(e) => setSourceId(e.target.value)}
-            className="bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[var(--brand-primary)] font-mono shadow-sm"
+            className="bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-[var(--brand-primary)] font-mono shadow-sm"
           >
             {containers.length === 0 ? (
-              <option value="">No running containers</option>
+              <option value="">No running containers (run one first!)</option>
             ) : (
               containers.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name} ({Object.values(c.networks)[0]?.ipAddress || 'no-ip'})
+                  {c.name} ({Object.values(c.networks)[0]?.ipAddress || '172.17.0.2'})
                 </option>
               ))
             )}
@@ -175,24 +255,24 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
         </div>
 
         {/* Destination Target */}
-        <div className="flex items-center space-x-2 flex-1 min-w-[200px]">
-          <span className="text-[var(--text-secondary)] font-semibold">Target:</span>
+        <div className="flex items-center space-x-1.5 flex-1 min-w-[180px]">
+          <span className="text-[var(--text-secondary)] font-semibold text-[11px]">To:</span>
           <input
             type="text"
             value={destTarget}
             onChange={(e) => setDestTarget(e.target.value)}
-            placeholder="api:5000 or database:5432 or localhost:5000"
-            className="flex-1 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[var(--brand-primary)] shadow-sm"
+            placeholder="db:5432 or api:5000 or localhost:5000"
+            className="flex-1 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-[var(--brand-primary)] shadow-sm"
           />
         </div>
 
         {/* Protocol */}
         <div className="flex items-center space-x-1">
-          {(['HTTP', 'PING', 'TCP'] as const).map((p) => (
+          {(['TCP', 'HTTP', 'PING'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setProtocol(p)}
-              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all ${
+              className={`px-2.5 py-1 rounded-xl text-[10.5px] font-bold transition-all ${
                 protocol === p
                   ? 'bg-[var(--brand-primary)] text-white shadow-md shadow-[var(--brand-primary)]/20'
                   : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:text-[var(--text-primary)]'
@@ -207,131 +287,180 @@ export function NetworkFlowVisualizer({ state }: NetworkFlowVisualizerProps) {
         <button
           onClick={handleRunTrace}
           disabled={traceState?.isRunning || !sourceContainer}
-          className="flex items-center space-x-1.5 px-4 py-1.5 rounded-xl bg-[var(--brand-primary)] text-white font-bold text-xs hover:brightness-110 disabled:opacity-50 shadow-md shadow-[var(--brand-primary)]/20 transition-all"
+          className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] text-white font-bold text-xs hover:brightness-110 disabled:opacity-50 shadow-md shadow-[var(--brand-primary)]/20 transition-all shrink-0"
         >
           <Send className="w-3.5 h-3.5" />
           <span>Send Request</span>
         </button>
       </div>
 
-      {/* Visual Canvas */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-grid-pattern">
-        {/* Nodes */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      {/* Quick Test Presets Pills */}
+      <div className="px-3.5 py-1.5 bg-[var(--bg-card)] border-b border-[var(--border-color)] flex items-center space-x-1.5 overflow-x-auto text-[10.5px] select-none scrollbar-none shrink-0">
+        <span className="text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[9.5px] mr-1 shrink-0">
+          Presets:
+        </span>
+        <button
+          onClick={() => setPreset('db:5432', 'TCP')}
+          className="px-2 py-0.5 rounded-lg bg-[var(--bg-subtle)] hover:bg-[var(--brand-light)] hover:text-[var(--brand-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] transition-all font-mono shrink-0"
+        >
+          🎯 db:5432 (Postgres)
+        </button>
+        <button
+          onClick={() => setPreset('api:5000', 'HTTP')}
+          className="px-2 py-0.5 rounded-lg bg-[var(--bg-subtle)] hover:bg-[var(--brand-light)] hover:text-[var(--brand-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] transition-all font-mono shrink-0"
+        >
+          🌐 api:5000 (HTTP)
+        </button>
+        <button
+          onClick={() => setPreset('localhost:5000', 'HTTP')}
+          className="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-all font-mono shrink-0"
+        >
+          ❌ localhost:5000 (Why it fails)
+        </button>
+      </div>
+
+      {/* Visual Canvas Area */}
+      <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 bg-grid-pattern min-h-0">
+        {/* Visual Nodes */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 items-center">
           {/* Source Node */}
-          <div className="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm text-center relative">
-            <div className="w-11 h-11 rounded-2xl bg-[var(--brand-light)] text-[var(--brand-primary)] flex items-center justify-center mx-auto mb-2 font-bold shadow-sm">
-              <Server className="w-6 h-6" />
+          <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm text-center relative">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--brand-light)] text-[var(--brand-primary)] flex items-center justify-center mx-auto mb-1.5 font-bold shadow-sm">
+              <Server className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display">{sourceContainer?.name || 'Source Container'}</h4>
+            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display truncate">
+              {sourceContainer?.name || 'Source Container'}
+            </h4>
             <span className="text-[10px] font-mono text-[var(--text-muted)] block mt-0.5">
-              IP: {Object.values(sourceContainer?.networks || {})[0]?.ipAddress || '172.18.0.2'}
+              IP: {Object.values(sourceContainer?.networks || {})[0]?.ipAddress || '172.17.0.2'}
             </span>
-            <div className="mt-2 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 py-0.5 rounded-full border border-emerald-500/20 font-semibold">
-              Packet Origin
+            <div className="mt-2 text-[9.5px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 py-0.5 rounded-full border border-emerald-500/20 font-semibold">
+              Packet Origin (Sender)
             </div>
           </div>
 
-          {/* Docker Network Bridge & DNS */}
-          <div className="p-5 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 shadow-sm text-center relative">
-            <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-2 font-bold shadow-sm">
-              <Network className="w-6 h-6" />
+          {/* Docker Network Bridge & Embedded DNS */}
+          <div className="p-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 shadow-sm text-center relative">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-1.5 font-bold shadow-sm">
+              <Network className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display">Docker Virtual Bridge</h4>
+            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display">
+              {isSharedCustomNetwork() ? 'User-Defined Bridge (app-net)' : 'Default Bridge Network'}
+            </h4>
             <span className="text-[10px] font-mono text-[var(--text-muted)] block mt-0.5">
-              Embedded DNS: 127.0.0.11
+              DNS Server: 127.0.0.11
             </span>
-            {traceState?.isRunning && (
-              <div className="mt-2 flex items-center justify-center space-x-1.5 text-[10.5px] text-indigo-600 dark:text-indigo-400 animate-pulse font-mono font-semibold">
+            {traceState?.isRunning ? (
+              <div className="mt-2 flex items-center justify-center space-x-1.5 text-[10px] text-indigo-600 dark:text-indigo-400 animate-pulse font-mono font-semibold">
                 <Radio className="w-3.5 h-3.5 animate-spin" />
-                <span>Resolving DNS & Routing...</span>
+                <span>Resolving DNS & Routing Packet...</span>
+              </div>
+            ) : (
+              <div className="mt-2 text-[9.5px] font-mono text-[var(--text-muted)] bg-[var(--bg-subtle)] py-0.5 rounded-full border border-[var(--border-color)]">
+                {isSharedCustomNetwork() ? '✔ Automatic DNS Enabled' : '⚠ Default Bridge (No DNS by name)'}
               </div>
             )}
           </div>
 
           {/* Destination Node */}
-          <div className="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm text-center relative">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2 font-bold shadow-sm">
-              <Globe className="w-6 h-6" />
+          <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm text-center relative">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-1.5 font-bold shadow-sm">
+              <Globe className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display">{destTarget}</h4>
+            <h4 className="font-bold text-xs text-[var(--text-primary)] font-display truncate">
+              {destTarget}
+            </h4>
             <span className="text-[10px] font-mono text-[var(--text-muted)] block mt-0.5">
-              Resolved: {traceState?.dnsResolvedIp || 'Pending...'}
+              Resolved: {traceState?.dnsResolvedIp || 'Pending Request...'}
             </span>
-            <div className="mt-2 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-subtle)] py-0.5 rounded-full border border-[var(--border-color)]">
-              Target Socket
+            <div className="mt-2 text-[9.5px] font-mono text-[var(--text-muted)] bg-[var(--bg-subtle)] py-0.5 rounded-full border border-[var(--border-color)]">
+              Target Socket ({protocol})
             </div>
           </div>
         </div>
 
         {/* Trace Inspector Card */}
-        {traceState && (
-          <div className="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-md space-y-3 font-mono text-xs">
+        {traceState && !traceState.isRunning && (
+          <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-md space-y-3 font-mono text-xs animate-in fade-in duration-150">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
-              <span className="font-bold text-[var(--text-primary)] flex items-center space-x-2 font-display">
+              <span className="font-bold text-[var(--text-primary)] flex items-center space-x-1.5 font-display">
                 <Sparkles className="w-4 h-4 text-[var(--brand-primary)]" />
-                <span>Packet Trace Inspector</span>
+                <span>Packet Trace Result</span>
               </span>
               {traceState.networkSuccess ? (
-                <span className="text-emerald-600 dark:text-emerald-400 flex items-center space-x-1 font-semibold">
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center space-x-1 font-semibold text-[11px]">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>200 OK Delivered</span>
                 </span>
-              ) : traceState.errorMsg ? (
-                <span className="text-rose-600 dark:text-rose-400 flex items-center space-x-1 font-semibold">
+              ) : (
+                <span className="text-rose-600 dark:text-rose-400 flex items-center space-x-1 font-semibold text-[11px]">
                   <ShieldAlert className="w-3.5 h-3.5" />
                   <span>Connection Failed</span>
                 </span>
-              ) : null}
+              )}
             </div>
 
             {/* Step 1: DNS */}
-            <div className="flex items-start space-x-2 text-xs">
-              <span className="w-5 h-5 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-center text-[10px] text-[var(--text-primary)] font-bold shrink-0">
+            <div className="flex items-start space-x-2 text-[11px]">
+              <span className="w-4 h-4 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-center text-[9px] text-[var(--text-primary)] font-bold shrink-0 mt-0.5">
                 1
               </span>
               <div>
                 <span className="font-semibold text-[var(--text-primary)]">Docker DNS Lookup:</span>
-                <span className="text-[var(--text-secondary)] ml-2">
-                  Queried 127.0.0.11 for hostname &quot;{destTarget.split(':')[0]}&quot; ➔{' '}
+                <span className="text-[var(--text-secondary)] ml-1.5">
+                  Queried 127.0.0.11 for &quot;{destTarget.split(':')[0]}&quot; ➔{' '}
                   <strong className={traceState.dnsSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
-                    {traceState.dnsResolvedIp || (traceState.errorMsg ? 'NXDOMAIN' : 'Querying...')}
+                    {traceState.dnsResolvedIp || 'NXDOMAIN (Not Found)'}
                   </strong>
                 </span>
               </div>
             </div>
 
-            {/* Error Message */}
+            {/* Diagnostic Explanation */}
             {traceState.errorMsg && (
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 space-y-1">
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 space-y-1.5">
                 <div className="font-bold text-[11px] flex items-center space-x-1.5 font-display">
-                  <ShieldAlert className="w-4 h-4 text-rose-500" />
-                  <span>Why this request failed:</span>
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Why this happened:</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-[var(--text-primary)] font-sans">{traceState.errorMsg}</p>
+                {traceState.suggestedFix && (
+                  <div className="pt-1.5 border-t border-rose-500/20 text-[10.5px] font-mono text-rose-600 dark:text-rose-400">
+                    💡 <strong>Fix:</strong> {traceState.suggestedFix}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Response JSON */}
             {traceState.responseBody && (
-              <div className="p-3.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
-                <span className="text-[10px] text-[var(--text-muted)] uppercase block mb-1">Response JSON Body:</span>
-                <pre className="text-emerald-600 dark:text-emerald-400 text-[11px] whitespace-pre-wrap">{traceState.responseBody}</pre>
+              <div className="p-3 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
+                <span className="text-[9.5px] text-[var(--text-muted)] uppercase block mb-1 font-semibold">
+                  Delivered Packet Metadata:
+                </span>
+                <pre className="text-emerald-600 dark:text-emerald-400 text-[10.5px] whitespace-pre-wrap">{traceState.responseBody}</pre>
               </div>
             )}
           </div>
         )}
 
-        {/* Mental Model Callout */}
-        <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] space-y-1.5 shadow-sm">
+        {/* Core Mental Model Card */}
+        <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] space-y-2 shadow-sm">
           <div className="flex items-center space-x-1.5 text-[var(--brand-primary)] font-bold font-display">
             <Info className="w-4 h-4" />
-            <span>Key Docker Networking Mental Model:</span>
+            <span>How Docker Container Networking Works:</span>
           </div>
-          <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed font-sans">
-            Containers on the <strong>same user-defined network</strong> can communicate seamlessly using container names (e.g.{' '}
-            <code className="text-[var(--brand-primary)] font-mono font-bold">http://api:5000</code>). Docker automatically runs an embedded DNS server that intercepts name lookups and resolves them to internal container IPs.
-          </p>
+          <ul className="text-[11px] text-[var(--text-secondary)] space-y-1.5 list-disc pl-4 font-sans leading-relaxed">
+            <li>
+              <strong>Default Bridge (172.17.0.0/16):</strong> Created automatically by Docker. Containers can reach each other <em>only by hardcoded IP</em> (no DNS by container name).
+            </li>
+            <li>
+              <strong>User-Defined Bridge (e.g. <code>app-net</code>):</strong> Created with <code>docker network create app-net</code>. Docker enables its embedded DNS server (<code>127.0.0.11</code>) so containers discover each other automatically by name (e.g. <code>http://db:5432</code>).
+            </li>
+            <li>
+              <strong>Testing in CLI:</strong> Use <code>docker exec &lt;container&gt; ping &lt;target&gt;</code> to ping inside a container, or test here in the visualizer!
+            </li>
+          </ul>
         </div>
       </div>
     </div>
