@@ -12,7 +12,9 @@ import {
   ChevronRight,
   Zap,
   X,
-  Columns,
+  AlertTriangle,
+  Info,
+  HelpCircle,
 } from 'lucide-react';
 import { getDockerEngine } from '@/lib/simulator/DockerEngine';
 import { CommandParser } from '@/lib/parser/CommandParser';
@@ -35,6 +37,7 @@ interface DockerTerminalProps {
 
 export function DockerTerminal({ onCommandExecuted, className = '', initialPrompt = '' }: DockerTerminalProps) {
   const [input, setInput] = useState(initialPrompt);
+  const [showBeginnerMode, setShowBeginnerMode] = useState(true);
   const [history, setHistory] = useState<HistoryEntry[]>([
     {
       id: 'init-1',
@@ -162,10 +165,10 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   };
 
   const quickCommands = [
-    { label: 'docker ps', cmd: 'docker ps -a' },
+    { label: 'docker ps -a', cmd: 'docker ps -a' },
     { label: 'run nginx', cmd: 'docker run -d --name web -p 8080:80 nginx:alpine' },
-    { label: 'images', cmd: 'docker images' },
-    { label: 'networks', cmd: 'docker network ls' },
+    { label: 'run postgres with volume', cmd: 'docker run -d --name db -v pgdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=secret postgres:16-alpine' },
+    { label: 'create network', cmd: 'docker network create app-net' },
     { label: 'compose up', cmd: 'docker compose up -d' },
   ];
 
@@ -184,11 +187,24 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
             Docker CLI Terminal
           </span>
           <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40">
-            Live
+            Simulator v27.1
           </span>
         </div>
 
         <div className="flex items-center space-x-1.5">
+          <button
+            onClick={() => setShowBeginnerMode(!showBeginnerMode)}
+            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] transition-colors ${
+              showBeginnerMode
+                ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-700/50'
+                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+            }`}
+            title="Toggle Beginner Explanations"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Explanations</span>
+          </button>
+
           <button
             onClick={copyAllOutput}
             className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-[11px]"
@@ -201,35 +217,36 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
           <button
             onClick={() => setHistory([])}
             className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors text-[11px]"
-            title="Clear Terminal Output"
+            title="Clear Console"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Clear</span>
           </button>
 
-          {/* Maximize / Restore Button */}
           <button
             onClick={() => setIsMaximized(!isMaximized)}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg font-bold text-xs transition-all ${
-              isMaximized
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-cyan-300'
-            }`}
-            title={isMaximized ? 'Restore Normal View (Esc)' : 'Expand Fullscreen'}
+            className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors text-[11px]"
+            title={isMaximized ? 'Exit Fullscreen (Esc)' : 'Maximize Terminal'}
           >
-            {isMaximized ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5" />
-                <span>Exit Fullscreen</span>
-              </>
-            ) : (
-              <>
-                <Maximize2 className="w-3.5 h-3.5" />
-                <span>Expand</span>
-              </>
-            )}
+            {isMaximized ? <Minimize2 className="w-3.5 h-3.5 text-cyan-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
         </div>
+      </div>
+
+      {/* Quick Launch Command Bar */}
+      <div className="shrink-0 bg-slate-900/90 border-b border-slate-800/80 px-3.5 py-1.5 flex items-center space-x-2 overflow-x-auto text-[11px] select-none scrollbar-none">
+        <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider flex items-center shrink-0">
+          <Zap className="w-3 h-3 mr-1 text-amber-400" /> Quick:
+        </span>
+        {quickCommands.map((qc, idx) => (
+          <button
+            key={idx}
+            onClick={() => runCommandString(qc.cmd)}
+            className="shrink-0 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-cyan-950 hover:text-cyan-300 hover:border-cyan-700/50 border border-slate-700/60 text-slate-300 transition-all font-mono text-[10.5px]"
+          >
+            {qc.label}
+          </button>
+        ))}
       </div>
 
       {/* Output Console Buffer */}
@@ -248,6 +265,19 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
               </span>
             </div>
 
+            {/* Beginner Breakdown Chips */}
+            {showBeginnerMode && entry.result.beginnerBreakdown && entry.result.beginnerBreakdown.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 my-1.5 p-2 rounded-lg bg-slate-900/60 border border-slate-800/60">
+                {entry.result.beginnerBreakdown.map((b, bIdx) => (
+                  <div key={bIdx} className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-slate-800/80 text-[10px] border border-slate-700/50">
+                    <span className="font-mono text-cyan-300 font-semibold">{b.token}</span>
+                    <span className="text-slate-400">→</span>
+                    <span className="text-slate-300">{b.description}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Standard Output */}
             {entry.result.stdout && (
               <pre className="text-slate-300 whitespace-pre-wrap pl-3.5 border-l-2 border-cyan-500/30 overflow-x-auto text-[11.5px] leading-relaxed">
@@ -263,10 +293,18 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
             )}
 
             {/* Educational "What Just Happened?" Explainer Box */}
-            {entry.result.explanation && (
-              <div className="mt-2.5 p-3.5 rounded-xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 text-xs shadow-lg space-y-2">
-                <div className="flex items-center space-x-2 text-cyan-300 font-bold font-display">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
+            {showBeginnerMode && entry.result.explanation && (
+              <div className={`mt-2.5 p-3.5 rounded-xl border text-xs shadow-lg space-y-2 ${
+                entry.result.exitCode !== 0
+                  ? 'bg-rose-950/20 border-rose-500/30 text-rose-200'
+                  : 'bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-cyan-500/30 text-cyan-300'
+              }`}>
+                <div className="flex items-center space-x-2 font-bold font-display">
+                  {entry.result.exitCode !== 0 ? (
+                    <AlertTriangle className="w-4 h-4 text-rose-400" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                  )}
                   <span>{entry.result.explanation.title}</span>
                 </div>
                 <p className="text-slate-300 text-[11px] leading-relaxed">
@@ -275,7 +313,7 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
                 <div className="space-y-1 pl-2 border-l border-slate-800 text-[11px] text-slate-400">
                   {entry.result.explanation.steps.map((step, idx) => (
                     <div key={idx} className="flex items-start space-x-1.5">
-                      <ChevronRight className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" />
+                      <ChevronRight className={`w-3 h-3 mt-0.5 shrink-0 ${entry.result.exitCode !== 0 ? 'text-rose-400' : 'text-emerald-400'}`} />
                       <span>{step}</span>
                     </div>
                   ))}
@@ -327,64 +365,21 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
           Execute
         </button>
       </div>
-
-      {/* 1-Click Quick Run Bar */}
-      <div className="shrink-0 flex items-center space-x-1.5 px-3 py-1.5 bg-slate-950/90 border-t border-slate-900 overflow-x-auto text-[10.5px]">
-        <span className="text-slate-500 shrink-0 font-display flex items-center space-x-1">
-          <Zap className="w-3 h-3 text-amber-400" />
-          <span>Quick Run:</span>
-        </span>
-        {quickCommands.map((qc, i) => (
-          <button
-            key={i}
-            onClick={() => runCommandString(qc.cmd)}
-            className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-cyan-300 hover:bg-slate-800 border border-slate-800 shrink-0 font-mono text-[10px] transition-colors"
-          >
-            {qc.label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 
-  // Maximized / Fullscreen Overlay View
   if (isMaximized) {
     return (
-      <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl p-4 sm:p-6 flex flex-col items-center justify-center animate-in fade-in">
-        <div className="w-full max-w-6xl h-full flex flex-col rounded-3xl border border-cyan-500/40 shadow-2xl overflow-hidden bg-[#080d1a]">
-          {/* Top Control Bar in Fullscreen */}
-          <div className="shrink-0 flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-cyan-500/30">
-            <div className="flex items-center space-x-2">
-              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-bold text-sm text-cyan-300 font-display">
-                Fullscreen Terminal Workspace
-              </span>
-              <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-                (Press Esc or click below to restore normal layout)
-              </span>
-            </div>
-
-            <button
-              onClick={() => setIsMaximized(false)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-all shadow-lg shadow-rose-600/30"
-            >
-              <Minimize2 className="w-4 h-4" />
-              <span>Exit Fullscreen / Restore (Esc)</span>
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-            {terminalBody}
-          </div>
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/90 backdrop-blur-md p-4 sm:p-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col bg-[#080d1a]">
+          {terminalBody}
         </div>
       </div>
     );
   }
 
-  // Normal Side-by-Side View
   return (
-    <div className={`h-full w-full min-h-0 flex flex-col rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-lg ${className}`}>
+    <div className={`flex flex-col h-full rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden ${className}`}>
       {terminalBody}
     </div>
   );

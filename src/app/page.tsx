@@ -23,7 +23,7 @@ export default function LandingPage() {
   const chapters = CURRICULUM_CHAPTERS.slice(0, 6);
 
   return (
-    <div className="flex-1 flex flex-col bg-[#070b14] bg-grid-pattern relative overflow-hidden">
+    <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col bg-[#070b14] bg-grid-pattern relative">
       {/* Ambient Gradient Glow Lights */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-cyan-600/20 via-sky-500/20 to-indigo-600/15 blur-[140px] pointer-events-none rounded-full" />
 

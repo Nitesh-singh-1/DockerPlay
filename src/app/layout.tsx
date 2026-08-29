@@ -43,14 +43,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} h-full overflow-hidden`}
+      className={`light ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} min-h-full`}
       data-brand="sky"
       data-mode="light"
     >
       <head>
         <GoogleAdSense />
       </head>
-      <body className="h-full w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] antialiased flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-800">
+      <body className="min-h-screen w-full bg-[var(--bg-page)] text-[var(--text-primary)] antialiased flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-800">
         <ThemeProvider>
           <Navbar />
           <main className="flex-1 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col min-h-0">
