@@ -16,6 +16,10 @@ import {
   Box,
   Flame,
   Globe,
+  Github,
+  Heart,
+  Code2,
+  ExternalLink,
 } from 'lucide-react';
 import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
 
@@ -161,12 +165,71 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-white/5 bg-slate-950 py-6 px-4 text-center text-xs text-slate-500 space-y-1">
-        <p className="font-display font-semibold text-slate-400">DockerPlay — Modern Interactive Docker Learning Platform</p>
-        <p className="text-[11px]">
-          Safe browser simulation engine. Zero Docker Desktop installation required.
-        </p>
+      {/* Rich Portfolio & Creator Footer */}
+      <footer className="mt-auto border-t border-white/10 bg-slate-950/90 backdrop-blur-md py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Brand & Mission */}
+          <div className="space-y-2 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start space-x-2">
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md">
+                <Layers className="w-4 h-4" />
+              </div>
+              <span className="font-extrabold text-base font-display text-slate-100 tracking-tight">
+                Docker<span className="text-cyan-400">Play</span>
+              </span>
+              <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/50 font-bold">
+                Open Source
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+              An interactive, browser-native Docker simulator and learning platform engineered for hands-on DevOps education.
+            </p>
+          </div>
+
+          {/* Author Attribution Card */}
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 shadow-xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 via-sky-500 to-indigo-600 flex items-center justify-center text-slate-950 font-bold font-mono text-sm shadow-md ring-2 ring-cyan-400/30 shrink-0">
+              NS
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-center sm:justify-start space-x-1.5 text-xs text-slate-200 font-semibold font-display">
+                <span>Architected & Engineered by</span>
+                <span className="text-cyan-400 font-bold">Nitesh Singh</span>
+              </div>
+              <p className="text-[11px] text-slate-400 font-mono">
+                Full-Stack & DevOps Engineering
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-2 sm:pt-0 sm:pl-2 sm:border-l sm:border-white/10 shrink-0">
+              <a
+                href="https://github.com/Nitesh-singh-1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition-all border border-slate-700 shadow-sm"
+              >
+                <Github className="w-3.5 h-3.5" />
+                <span>GitHub</span>
+              </a>
+              <a
+                href="https://github.com/Nitesh-singh-1/DockerPlay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-cyan-500/20"
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Star Repo</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+          <span>© {new Date().getFullYear()} DockerPlay. Created with Next.js 15, TypeScript & Docker Engine AST Simulation.</span>
+          <span className="flex items-center space-x-1 text-slate-400">
+            <span>Free & Open Source under MIT License</span>
+          </span>
+        </div>
       </footer>
     </div>
   );

@@ -1,6 +1,8 @@
 # DockerPlay — Architecture, State & Component Context Matrix
 
 > **Core Purpose**: Visual, interactive in-browser Docker learning playground & simulator. Zero Docker Desktop required.
+> **Architect & Creator**: Nitesh Singh ([@Nitesh-singh-1](https://github.com/Nitesh-singh-1))
+> **Live Web App**: [https://dockerplay-dd370.web.app/](https://dockerplay-dd370.web.app/)
 
 ---
 

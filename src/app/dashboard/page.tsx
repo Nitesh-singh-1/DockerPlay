@@ -14,6 +14,8 @@ import {
   Flame,
   Zap,
   RotateCcw,
+  Github,
+  Layers,
 } from 'lucide-react';
 import { ProgressManager, INITIAL_USER_PROGRESS } from '@/lib/persistence/ProgressManager';
 import { UserProgress } from '@/types/progress';
@@ -209,6 +211,33 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Creator & Portfolio Banner */}
+      <div className="p-5 rounded-3xl bg-slate-950/80 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div className="flex items-center space-x-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-slate-950 font-bold font-mono text-xs shadow-md">
+            NS
+          </div>
+          <div>
+            <div className="font-bold text-slate-200 font-display">
+              DockerPlay • Open Source Project
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Architected & Engineered by <strong className="text-cyan-400">Nitesh Singh</strong>
+            </div>
+          </div>
+        </div>
+
+        <a
+          href="https://github.com/Nitesh-singh-1/DockerPlay"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 font-semibold transition-all shadow-sm"
+        >
+          <Github className="w-3.5 h-3.5" />
+          <span>View on GitHub</span>
+        </a>
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import {
   Check,
   Menu,
   X,
+  Github,
 } from 'lucide-react';
 import { ProgressManager } from '@/lib/persistence/ProgressManager';
 import { UserProgress } from '@/types/progress';
@@ -252,6 +253,18 @@ export function Navbar() {
               </div>
             )}
           </div>
+
+          {/* GitHub / Creator Profile Link */}
+          <a
+            href="https://github.com/Nitesh-singh-1/DockerPlay"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all shadow-sm group"
+            title="Architected & Maintained by Nitesh Singh on GitHub"
+          >
+            <Github className="w-3.5 h-3.5 text-[var(--text-primary)] group-hover:scale-110 transition-transform" />
+            <span className="font-semibold text-[11px] hidden md:inline">GitHub</span>
+          </a>
 
           {/* Reset Docker Engine Button */}
           <div className="hidden sm:block">

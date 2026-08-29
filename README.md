@@ -98,6 +98,21 @@ npm run start
 
 ---
 
+## 👨‍💻 Author & Creator
+
+**Nitesh Singh**
+- **GitHub**: [@Nitesh-singh-1](https://github.com/Nitesh-singh-1)
+- **Repository**: [https://github.com/Nitesh-singh-1/DockerPlay](https://github.com/Nitesh-singh-1/DockerPlay)
+- **Live Demo**: [https://dockerplay-dd370.web.app/](https://dockerplay-dd370.web.app/)
+
+### 💡 Engineering & Architectural Highlights (Resume Portfolio):
+- **Custom Docker CLI Lexer & AST Parser**: Engineered a robust tokenizer capable of parsing Unix command syntax, quote escaping, subcommands, flag normalization (`-d`, `-it`, `-v`, `-p`, `-e`), and Levenshtein fuzzy error suggestions.
+- **In-Browser Docker Runtime State Machine**: Simulates realistic container states (`created`, `running`, `paused`, `restarting`, `exited`), layer caches, persistent volume mounts, and network namespaces without server-side compute.
+- **Embedded DNS & Virtual Network Flow Visualizer**: Implemented realistic `127.0.0.11` DNS service discovery across user-defined bridge networks with step-by-step packet trace animation.
+- **Next.js 15 & Modern UI System**: Built with React 19, TypeScript, and a CSS-variable design system supporting 5 custom brand palettes and dark mode.
+
+---
+
 ## 📄 License
 
-MIT License — feel free to use, modify, and distribute for educational purposes!
+MIT License — Created & Maintained by **Nitesh Singh**. Feel free to use, modify, and star the repository!
