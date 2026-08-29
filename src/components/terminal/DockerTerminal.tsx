@@ -379,7 +379,7 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   }
 
   return (
-    <div className={`flex flex-col h-full rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden ${className}`}>
+    <div className={`flex flex-col h-full min-h-0 w-full rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden ${className}`}>
       {terminalBody}
     </div>
   );

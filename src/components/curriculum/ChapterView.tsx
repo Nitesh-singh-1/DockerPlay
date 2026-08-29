@@ -339,9 +339,9 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
           mobileTab === 'terminal' ? 'flex' : 'hidden xl:flex'
         } ${!isTerminalOpen && 'xl:hidden'}`}
       >
-        <div className="p-2 sm:p-2.5 h-full w-full flex flex-col overflow-hidden">
+        <div className="p-2 sm:p-2.5 h-full min-h-0 w-full flex flex-col overflow-hidden">
           <DockerTerminal
-            className="h-full w-full"
+            className="h-full w-full min-h-0"
             onCommandExecuted={(cmd) => setLastExecutedCommand(cmd)}
           />
         </div>
