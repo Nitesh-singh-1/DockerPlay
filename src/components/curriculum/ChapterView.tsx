@@ -22,6 +22,7 @@ import { DockerTerminal } from '@/components/terminal/DockerTerminal';
 import { ExerciseRunner } from '@/components/curriculum/ExerciseRunner';
 import { QuizModal } from '@/components/curriculum/QuizModal';
 import { ProgressManager } from '@/lib/persistence/ProgressManager';
+import { AdBanner } from '@/components/ads/AdBanner';
 
 interface ChapterViewProps {
   chapterId: string;
@@ -230,6 +231,13 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
               {quizScore ? 'Retake Quiz' : 'Start Quiz'}
             </button>
           </div>
+
+          {/* Non-intrusive Ad Placement Below Lesson Lab */}
+          <AdBanner
+            slotId="1234567890"
+            label="Sponsor & Learn More"
+            className="my-3"
+          />
 
           {/* Prev / Next Chapter Navigation */}
           <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)] text-xs">

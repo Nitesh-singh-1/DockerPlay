@@ -3,6 +3,7 @@ import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { GoogleAdSense } from '@/components/ads/GoogleAdSense';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -40,6 +41,9 @@ export default function RootLayout({
       data-brand="sky"
       data-mode="light"
     >
+      <head>
+        <GoogleAdSense />
+      </head>
       <body className="h-full w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] antialiased flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-800">
         <ThemeProvider>
           <Navbar />

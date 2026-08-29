@@ -12,6 +12,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { DOCKER_CHEATSHEET, CheatSheetEntry } from '@/data/cheatsheet';
+import { AdBanner } from '@/components/ads/AdBanner';
 
 export default function CheatSheetPage() {
   const [query, setQuery] = useState('');
@@ -43,46 +44,45 @@ export default function CheatSheetPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#070b14] bg-grid-pattern p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
+    <div className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="space-y-2 pb-4 border-b border-white/5">
+      <div className="space-y-2 pb-4 border-b border-[var(--border-color)]">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-[var(--brand-light)] border border-[var(--brand-primary)]/20 text-[var(--brand-primary)] flex items-center justify-center">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 font-display">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] font-display">
             Docker Command Cheat Sheet
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
           Searchable, battle-tested reference library for core Docker commands with 1-click execution support.
         </p>
       </div>
 
-      {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* Search & Filter Bar */}
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             type="text"
-            placeholder="Search commands, flags, or keywords (e.g. port, volume, -d)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-slate-900/90 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+            placeholder="Search commands, flags, or concepts (e.g. port mapping, volume, rm, logs)..."
+            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--brand-primary)] shadow-sm font-sans"
           />
         </div>
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-1.5 overflow-x-auto">
+        {/* Category Pills */}
+        <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 selectedCategory === cat
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
-                  : 'bg-slate-900/80 text-slate-400 border border-white/5 hover:text-slate-200 hover:bg-slate-800'
+                  ? 'bg-[var(--brand-primary)] text-white shadow-sm'
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] hover:bg-[var(--bg-subtle)]'
               }`}
             >
               {cat}
@@ -91,40 +91,39 @@ export default function CheatSheetPage() {
         </div>
       </div>
 
-      {/* Cards Grid */}
+      {/* Commands Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((entry, idx) => (
           <div
             key={idx}
-            className="p-5 rounded-2xl bg-slate-900/50 border border-white/10 space-y-3.5 flex flex-col justify-between hover:border-cyan-500/30 hover:bg-slate-900/80 transition-all group shadow-xl"
+            className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm hover:border-[var(--brand-primary)]/40 transition-all flex flex-col justify-between"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-cyan-300 font-mono">
-                  {entry.command}
-                </span>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/5">
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/20">
                   {entry.category}
                 </span>
+                <span className="text-xs font-bold text-[var(--text-primary)] font-display">{entry.description}</span>
               </div>
 
-              <p className="text-xs text-slate-100 font-medium leading-relaxed font-display">
-                {entry.description}
-              </p>
-
-              {/* Example box with 1-click execution */}
-              <div className="p-3 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between group-hover:border-cyan-500/30 transition-colors">
-                <code className="font-mono text-xs text-emerald-400 overflow-x-auto">
-                  {entry.example}
-                </code>
+              {/* Code Snippet with Copy and 1-Click Run */}
+              <div className="p-3 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between font-mono text-xs">
+                <code className="text-[var(--brand-primary)] font-bold truncate pr-2">{entry.example}</code>
                 <div className="flex items-center space-x-1 shrink-0 ml-2">
                   <button
+                    onClick={() => triggerRunCommand(entry.example)}
+                    className="p-1 rounded-md text-[var(--brand-primary)] hover:bg-[var(--brand-light)] transition-colors"
+                    title="1-Click Run in Terminal"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                  </button>
+                  <button
                     onClick={() => handleCopy(entry.example)}
-                    className="p-1 rounded-md text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                    className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-colors"
                     title="Copy command"
                   >
                     {copiedCmd === entry.example ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
@@ -132,25 +131,32 @@ export default function CheatSheetPage() {
                 </div>
               </div>
 
-              <p className="text-[11.5px] text-slate-400 leading-relaxed">
+              <p className="text-[11.5px] text-[var(--text-secondary)] leading-relaxed">
                 {entry.explanation}
               </p>
             </div>
 
             {/* Warnings & Pro Tips */}
-            <div className="space-y-2 pt-2.5 border-t border-white/5 text-[11px]">
-              <div className="flex items-start space-x-1.5 text-rose-300/90 bg-rose-950/20 p-2 rounded-lg border border-rose-900/30">
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+            <div className="space-y-2 pt-2.5 border-t border-[var(--border-color)] text-[11px]">
+              <div className="flex items-start space-x-1.5 text-rose-700 dark:text-rose-300 bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
                 <span><strong>Watch out:</strong> {entry.commonMistakes}</span>
               </div>
-              <div className="flex items-start space-x-1.5 text-emerald-300/90 bg-emerald-950/20 p-2 rounded-lg border border-emerald-900/30">
-                <Lightbulb className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="flex items-start space-x-1.5 text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                <Lightbulb className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                 <span><strong>Pro Tip:</strong> {entry.tip}</span>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Non-intrusive Ad Banner */}
+      <AdBanner
+        slotId="9876543210"
+        label="Sponsored Resources"
+        className="my-6"
+      />
     </div>
   );
 }

@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "staging": "dockerplay-dd370"
+  },
+  "targets": {},
+  "etags": {}
+}
