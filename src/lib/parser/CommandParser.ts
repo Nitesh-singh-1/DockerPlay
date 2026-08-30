@@ -149,8 +149,12 @@ export class CommandParser {
     // Check for `docker compose ...` (v2 format)
     if (binary === 'docker' && command === 'compose') {
       binary = 'docker-compose';
-      command = tokens[startIndex]?.toLowerCase() || 'ps';
-      startIndex++;
+      if (tokens[startIndex] && !tokens[startIndex].startsWith('-')) {
+        command = tokens[startIndex].toLowerCase();
+        startIndex++;
+      } else {
+        command = 'compose';
+      }
     }
 
     // Check for subcommands like `docker network create`, `docker volume ls`, `docker image inspect`, `docker container ls`

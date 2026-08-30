@@ -1913,7 +1913,64 @@ export class DockerEngine {
       };
     }
 
-    return { stdout: 'Docker Compose active.', stderr: '', exitCode: 0 };
+    if (cmd === 'ps') {
+      const composeContainers = Object.values(this.state.containers).filter((c) => c.labels['com.docker.compose.project']);
+      if (composeContainers.length === 0) {
+        return { stdout: 'NAME                     IMAGE             COMMAND          SERVICE     STATUS    PORTS', stderr: '', exitCode: 0 };
+      }
+      let out = 'NAME                     IMAGE             COMMAND          SERVICE     STATUS              PORTS\n';
+      for (const c of composeContainers) {
+        const portsStr = c.ports.map((p) => `0.0.0.0:${p.hostPort}->${p.containerPort}/tcp`).join(', ');
+        const svc = c.name.split('-')[1] || c.name;
+        out += `${c.name.padEnd(25)}${c.image.padEnd(18)}${c.command.padEnd(17)}${svc.padEnd(12)}${'Up (healthy)'.padEnd(20)}${portsStr}\n`;
+      }
+      return { stdout: out.trimEnd(), stderr: '', exitCode: 0 };
+    }
+
+    if (cmd === 'logs') {
+      const composeContainers = Object.values(this.state.containers).filter((c) => c.labels['com.docker.compose.project']);
+      if (composeContainers.length === 0) {
+        return { stdout: 'No compose services running. Run "docker compose up -d" to start.', stderr: '', exitCode: 0 };
+      }
+      let out = '';
+      for (const c of composeContainers) {
+        const svc = c.name.split('-')[1] || c.name;
+        out += `${svc.padEnd(10)} | Service ${svc} ready and accepting connections\n`;
+      }
+      return { stdout: out.trimEnd(), stderr: '', exitCode: 0 };
+    }
+
+    if (cmd === 'restart') {
+      const composeContainers = Object.values(this.state.containers).filter((c) => c.labels['com.docker.compose.project']);
+      for (const c of composeContainers) {
+        c.startedAt = Date.now();
+        c.status = 'running';
+      }
+      this.notify();
+      return {
+        stdout: `[+] Restarting 3/3\n ✔ Container dockerplay-frontend-1  Restarted\n ✔ Container dockerplay-backend-1   Restarted\n ✔ Container dockerplay-database-1  Restarted`,
+        stderr: '',
+        exitCode: 0,
+      };
+    }
+
+    return {
+      stdout: `
+Usage:  docker compose [COMMAND]
+
+Define and run multi-container applications with Docker.
+
+Commands:
+  build       Build or rebuild services
+  down        Stop and remove containers, networks
+  logs        View output from containers
+  ps          List containers
+  restart     Restart service containers
+  up          Create and start containers
+`,
+      stderr: '',
+      exitCode: 0,
+    };
   }
 
   private handleHelp(): CommandExecutionResult {

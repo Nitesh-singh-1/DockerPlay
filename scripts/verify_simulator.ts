@@ -98,4 +98,28 @@ const netInspectRes = engine.execute(netInspectCmd);
 assert(netInspectRes.exitCode === 0, 'Network inspect should succeed');
 assert(netInspectRes.stdout.includes('"Name": "app-net"'), 'Network inspect should contain app-net');
 
-console.log('\n🎉 ALL 9 CRITICAL AUDIT & PARSER TESTS PASSED PERFECTLY!');
+// Test 10: Docker Compose lifecycle (docker compose up -d, ps, down)
+console.log('\n--- Test 10: Docker Compose lifecycle ---');
+const composeUpCmd = CommandParser.parse('docker compose up -d');
+assert(composeUpCmd.isValid === true, `docker compose up -d should be valid: ${composeUpCmd.validationError}`);
+assert(composeUpCmd.command === 'up', `Command should be "up", got "${composeUpCmd.command}"`);
+assert(composeUpCmd.flags.detach === true, 'Flag detach (-d) should be true');
+
+const composeUpRes = engine.execute(composeUpCmd);
+assert(composeUpRes.exitCode === 0, `Compose up execution should succeed: ${composeUpRes.stderr}`);
+assert(composeUpRes.stdout.includes('Created'), 'Compose up should report network/container creation');
+assert(Object.values(engine.getState().containers).some(c => c.name.includes('frontend')), 'Frontend container should exist');
+
+const composePsCmd = CommandParser.parse('docker compose ps');
+assert(composePsCmd.isValid === true, 'docker compose ps should be valid');
+const composePsRes = engine.execute(composePsCmd);
+assert(composePsRes.exitCode === 0, 'docker compose ps should succeed');
+assert(composePsRes.stdout.includes('dockerplay-frontend-1'), 'compose ps should list frontend service');
+
+const composeDownCmd = CommandParser.parse('docker compose down');
+assert(composeDownCmd.isValid === true, 'docker compose down should be valid');
+const composeDownRes = engine.execute(composeDownCmd);
+assert(composeDownRes.exitCode === 0, 'docker compose down should succeed');
+
+console.log('\n🎉 ALL 10 CRITICAL AUDIT, SIMULATOR & COMPOSE TESTS PASSED PERFECTLY!');
+

@@ -87,6 +87,11 @@ src/
   - Multi-network containers: When a container is on both `bridge` and `app-net`, the engine **always prioritizes user-defined networks** for DNS resolution.
 - **Host vs Container Execution**:
   - Raw Linux utilities (`ping`, `curl`, `nc`, `cat`, `ls`) typed directly into host Docker CLI produce educational guidance pointing to `docker exec <container> <cmd>`.
+- **Docker Compose (`docker compose` & `docker-compose`)**:
+  - Subcommands: `up` (`-d`, `--build`), `down` (`-v`), `ps`, `logs`, `restart`, `build`.
+  - `docker compose up -d` auto-provisions project network (`dockerplay_default`), volume (`dbdata`), and 3 microservice containers (`frontend`, `backend`, `database`).
+  - `docker compose ps` lists services and mapped host/container ports.
+  - `docker compose down` gracefully removes containers and project network.
 
 ---
 

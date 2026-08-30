@@ -388,6 +388,39 @@ export const DOCKER_COMMAND_SCHEMAS: Record<string, CommandSchema> = {
       p: 'project-name',
     },
   },
+  up: {
+    command: 'up',
+    description: 'Create and start containers',
+    usage: 'docker compose up [OPTIONS] [SERVICE...]',
+    flags: {
+      detach: { name: 'detach', shorthand: 'd', type: 'boolean', description: 'Detached mode: Run containers in the background' },
+      build: { name: 'build', type: 'boolean', description: 'Build images before starting containers' },
+      file: { name: 'file', shorthand: 'f', type: 'string', description: 'Compose configuration files' },
+      'project-name': { name: 'project-name', shorthand: 'p', type: 'string', description: 'Project name' },
+      'remove-orphans': { name: 'remove-orphans', type: 'boolean', description: 'Remove containers for services not defined in Compose file' },
+      'force-recreate': { name: 'force-recreate', type: 'boolean', description: 'Recreate containers even if their config and image haven\'t changed' },
+      help: { name: 'help', type: 'boolean', description: 'Print usage' },
+    },
+    shorthands: {
+      d: 'detach',
+      f: 'file',
+      p: 'project-name',
+    },
+  },
+  down: {
+    command: 'down',
+    description: 'Stop and remove containers, networks',
+    usage: 'docker compose down [OPTIONS]',
+    flags: {
+      volumes: { name: 'volumes', shorthand: 'v', type: 'boolean', description: 'Remove named volumes declared in the volumes section' },
+      'remove-orphans': { name: 'remove-orphans', type: 'boolean', description: 'Remove containers for services not defined in Compose file' },
+      rmi: { name: 'rmi', type: 'string', description: 'Remove images used by services ("all" | "local")' },
+      help: { name: 'help', type: 'boolean', description: 'Print usage' },
+    },
+    shorthands: {
+      v: 'volumes',
+    },
+  },
 };
 
 /**
