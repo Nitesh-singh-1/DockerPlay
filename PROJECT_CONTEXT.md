@@ -20,7 +20,8 @@ src/
 │   ├── break-fix/              # Production incident break/fix troubleshooting labs
 │   └── tools/
 │       ├── cheat-sheet/        # Quick Docker command reference
-│       ├── compose-studio/     # Multi-tier compose orchestration
+│       ├── compose-studio/     # Multi-tier compose orchestration & YAML editor
+│       ├── dockerfile-studio/  # Step-by-step Dockerfile & multi-stage layer builder
 │       └── network-visualizer/ # Standalone network bridge debugger
 ├── components/
 │   ├── terminal/
@@ -30,7 +31,8 @@ src/
 │   │   ├── NetworkFlowVisualizer.tsx   # Packet tracer, DNS 127.0.0.11 & bridge routes
 │   │   ├── PortBridgeVisualizer.tsx    # Host-to-container port mapping visualizer
 │   │   ├── ImageLayerVisualizer.tsx    # Immutable layer stack & cache diff
-│   │   └── ComposeTopologyVisualizer.tsx # 3-tier compose dependency visualizer
+│   │   ├── ComposeTopologyVisualizer.tsx # 3-tier compose dependency & YAML visualizer
+│   │   └── DockerfileStudioVisualizer.tsx # Multi-stage Dockerfile layer builder visualizer
 │   ├── curriculum/
 │   │   ├── ChapterView.tsx             # 3-pane curriculum lesson viewer
 │   │   ├── QuizModal.tsx               # Chapter knowledge check MCQ modals

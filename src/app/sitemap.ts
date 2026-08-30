@@ -56,8 +56,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/tools/compose-studio/`,
       lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.75,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/tools/dockerfile-studio/`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
   ];
 

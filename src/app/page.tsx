@@ -20,6 +20,7 @@ import {
   Heart,
   Code2,
   ExternalLink,
+  FileCode,
 } from 'lucide-react';
 import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
 
@@ -114,53 +115,77 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1 */}
           <Link
             href="/playground"
-            className="p-6 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-cyan-500/40 hover:bg-slate-900/90 transition-all space-y-3.5 group shadow-xl"
+            className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-cyan-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Terminal className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Terminal className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-sm text-slate-100 group-hover:text-cyan-300 font-display">
+                Live Terminal & Auto-Explainer
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Step-by-step <em>&quot;What Just Happened?&quot;</em> explanation and beginner mode flag breakdown.
+              </p>
             </div>
-            <h3 className="font-bold text-base text-slate-100 group-hover:text-cyan-300 font-display">
-              Live Terminal & Auto-Explainer
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Every command receives a step-by-step <em>&quot;What Just Happened?&quot;</em> explanation and beginner mode flag breakdown.
-            </p>
           </Link>
 
           {/* Card 2 */}
           <Link
             href="/tools/network-visualizer"
-            className="p-6 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-indigo-500/40 hover:bg-slate-900/90 transition-all space-y-3.5 group shadow-xl"
+            className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-indigo-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Network className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Network className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-sm text-slate-100 group-hover:text-indigo-300 font-display">
+                Network Flow & DNS Tracer
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Send animated HTTP packets across bridge networks and learn why <code>localhost</code> fails.
+              </p>
             </div>
-            <h3 className="font-bold text-base text-slate-100 group-hover:text-indigo-300 font-display">
-              Network Flow & DNS Tracer
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Send animated HTTP packets across bridge networks and learn why <code>localhost</code> between containers fails.
-            </p>
           </Link>
 
           {/* Card 3 */}
           <Link
             href="/tools/compose-studio"
-            className="p-6 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-emerald-500/40 hover:bg-slate-900/90 transition-all space-y-3.5 group shadow-xl"
+            className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-emerald-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Box className="w-6 h-6" />
+            <div className="space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Box className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-sm text-slate-100 group-hover:text-emerald-300 font-display">
+                Compose 3-Tier Studio
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Live editable YAML, service dependency graph, and 1-click multi-container orchestration.
+              </p>
             </div>
-            <h3 className="font-bold text-base text-slate-100 group-hover:text-emerald-300 font-display">
-              Compose 3-Tier Multi-Service
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Orchestrate Frontend, Node/Python API, and PostgreSQL databases with single-command declarative management.
-            </p>
+          </Link>
+
+          {/* Card 4 */}
+          <Link
+            href="/tools/dockerfile-studio"
+            className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-amber-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
+          >
+            <div className="space-y-3">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <FileCode className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-sm text-slate-100 group-hover:text-amber-300 font-display">
+                Dockerfile Image Builder
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Multi-stage build studio, layer cache simulator, and image slimming optimizer.
+              </p>
+            </div>
           </Link>
         </div>
       </section>

@@ -22,6 +22,8 @@ import {
   Menu,
   X,
   Github,
+  FileCode,
+  Box,
 } from 'lucide-react';
 import { ProgressManager } from '@/lib/persistence/ProgressManager';
 import { UserProgress } from '@/types/progress';
@@ -62,8 +64,10 @@ export function Navbar() {
   const navLinks = [
     { href: '/playground', label: 'Playground', icon: Terminal },
     { href: '/curriculum/what-is-docker', label: 'Curriculum', icon: BookOpen },
+    { href: '/tools/compose-studio', label: 'Compose Studio', icon: Box },
+    { href: '/tools/dockerfile-studio', label: 'Dockerfile Studio', icon: FileCode },
     { href: '/missions', label: 'Missions', icon: Target },
-    { href: '/break-fix', label: 'Break/Fix Lab', icon: Wrench },
+    { href: '/break-fix', label: 'Break/Fix', icon: Wrench },
     { href: '/tools/cheat-sheet', label: 'Cheat Sheet', icon: HelpCircle },
   ];
 

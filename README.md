@@ -20,8 +20,8 @@ A modern, beginner-friendly, visual **Docker Learning Playground** built to teac
 - **Topology & Cluster Canvas**: Live interactive map of host boundaries, Docker daemon (`dockerd`), active container nodes with CPU/RAM gauge bars, bridge networks, and volume mounts.
 - **Network Flow & DNS Visualizer**: Step-by-step animated packet tracer demonstrating embedded DNS resolution (`127.0.0.11`) and why `localhost` between containers fails.
 - **Port NAT Bridge Visualizer**: Interactive host-to-container port translation bridge (`localhost:HOST_PORT` $\rightarrow$ `Container:PORT`).
-- **Image Layer Stack & Build Cache**: Layer cake visualization showing layer sizes and cache hits (`CACHED` vs `REBUILT`).
-- **Docker Compose 3-Tier Studio**: Multi-tier architecture visualizer linking Frontend, API backend, and PostgreSQL database with `docker compose up -d`.
+- **Docker Compose 3-Tier Studio**: Interactive `docker-compose.yml` blueprint editor with live multi-tier service dependency topology (Frontend $\rightarrow$ API $\rightarrow$ Database) and 1-click `docker compose up -d` execution.
+- **Dockerfile Studio & Multi-Stage Image Builder**: Interactive Dockerfile template constructor, layer-by-layer cache hit simulator (`CACHED` vs `REBUILT`), and multi-stage image slimming comparison (e.g. 1.15GB fat image $\rightarrow$ 82MB Alpine image).
 - **Container Explorer**: Docker Desktop-style container table with start, stop, restart, and delete lifecycle controls.
 
 ### 3. 📚 Structured Curriculum & Hands-on Quests
