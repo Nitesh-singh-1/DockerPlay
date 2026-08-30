@@ -103,7 +103,7 @@ npm run start
 **Nitesh Singh**
 - **GitHub**: [@Nitesh-singh-1](https://github.com/Nitesh-singh-1)
 - **Repository**: [https://github.com/Nitesh-singh-1/DockerPlay](https://github.com/Nitesh-singh-1/DockerPlay)
-- **Live Demo**: [https://dockerplay-dd370.web.app/](https://dockerplay-dd370.web.app/)
+- **Live Platform**: [https://dockerplay.org](https://dockerplay.org) *(Mirror: [https://dockerplay-dd370.web.app/](https://dockerplay-dd370.web.app/))*
 
 ### 💡 Engineering & Architectural Highlights (Resume Portfolio):
 - **Custom Docker CLI Lexer & AST Parser**: Engineered a robust tokenizer capable of parsing Unix command syntax, quote escaping, subcommands, flag normalization (`-d`, `-it`, `-v`, `-p`, `-e`), and Levenshtein fuzzy error suggestions.
