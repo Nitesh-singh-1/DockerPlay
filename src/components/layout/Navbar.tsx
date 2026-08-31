@@ -24,6 +24,7 @@ import {
   Github,
   FileCode,
   Box,
+  Network,
 } from 'lucide-react';
 import { ProgressManager } from '@/lib/persistence/ProgressManager';
 import { UserProgress } from '@/types/progress';
@@ -37,6 +38,7 @@ export function Navbar() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { mode, brand, setBrand, toggleMode } = useTheme();
@@ -49,9 +51,10 @@ export function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close mobile menu on page change
+  // Close menus on page change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsToolsMenuOpen(false);
   }, [pathname]);
 
   const handleReset = () => {
@@ -61,14 +64,23 @@ export function Navbar() {
 
   const levelInfo = ProgressManager.getLevelInfo(progress.xpPoints || 50);
 
-  const navLinks = [
+  const primaryNavLinks = [
     { href: '/playground', label: 'Playground', icon: Terminal },
     { href: '/curriculum/what-is-docker', label: 'Curriculum', icon: BookOpen },
-    { href: '/tools/compose-studio', label: 'Compose Studio', icon: Box },
-    { href: '/tools/dockerfile-studio', label: 'Dockerfile Studio', icon: FileCode },
     { href: '/missions', label: 'Missions', icon: Target },
     { href: '/break-fix', label: 'Break/Fix', icon: Wrench },
-    { href: '/tools/cheat-sheet', label: 'Cheat Sheet', icon: HelpCircle },
+  ];
+
+  const toolsNavLinks = [
+    { href: '/tools/compose-studio', label: 'Compose Studio', icon: Box, desc: 'Multi-service YAML editor & visualizer' },
+    { href: '/tools/dockerfile-studio', label: 'Dockerfile Studio', icon: FileCode, desc: 'Multi-stage image builder & layer cache' },
+    { href: '/tools/network-visualizer', label: 'Network Tracer', icon: Network, desc: 'Bridge packet tracer & DNS 127.0.0.11' },
+    { href: '/tools/cheat-sheet', label: 'Cheat Sheet', icon: HelpCircle, desc: 'Categorized CLI command reference' },
+  ];
+
+  const allNavLinks = [
+    ...primaryNavLinks,
+    ...toolsNavLinks,
   ];
 
   const brandThemes: Array<{
@@ -136,7 +148,7 @@ export function Navbar() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center space-x-1">
-            {navLinks.map((link) => {
+            {primaryNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive =
                 pathname === link.href ||
@@ -146,7 +158,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
                       ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] shadow-sm font-bold'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
@@ -157,25 +169,70 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Tools Dropdown for Studios & Visualizers */}
+            <div className="relative">
+              <button
+                onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+                className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  pathname?.startsWith('/tools')
+                    ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+                }`}
+              >
+                <Box className="w-3.5 h-3.5" />
+                <span>Studios & Tools</span>
+                <ChevronDown className="w-3 h-3 text-[var(--text-muted)]" />
+              </button>
+
+              {isToolsMenuOpen && (
+                <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 text-xs space-y-1">
+                  <div className="px-2.5 py-1.5 border-b border-[var(--border-color)] mb-1">
+                    <span className="text-[10px] font-mono uppercase font-bold text-[var(--text-muted)] block">
+                      Interactive Studios & Tools
+                    </span>
+                  </div>
+                  {toolsNavLinks.map((tool) => {
+                    const Icon = tool.icon;
+                    const isToolActive = pathname === tool.href;
+                    return (
+                      <Link
+                        key={tool.href}
+                        href={tool.href}
+                        onClick={() => setIsToolsMenuOpen(false)}
+                        className={`flex items-start space-x-2.5 p-2 rounded-xl transition-all ${
+                          isToolActive
+                            ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
+                            : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 text-[var(--brand-primary)] shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-semibold text-xs leading-tight">{tool.label}</div>
+                          <div className="text-[10.5px] text-[var(--text-muted)] leading-tight">{tool.desc}</div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 
         {/* Right Action Controls */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2.5">
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           {/* Level & XP Widget */}
           <Link
             href="/dashboard"
             className="flex items-center space-x-1.5 px-2 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-primary)] transition-all shadow-sm"
             title={`${levelInfo.progressXP} / 200 XP to next level`}
           >
-            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 text-slate-950 font-bold font-mono text-[10px] flex items-center justify-center shadow-sm">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 text-slate-950 font-bold font-mono text-[10px] flex items-center justify-center shadow-sm shrink-0">
               {levelInfo.level}
             </div>
             <div className="hidden sm:flex flex-col text-left">
-              <span className="text-[10px] font-bold text-[var(--text-primary)] font-display leading-none">
-                {levelInfo.title}
-              </span>
-              <span className="text-[9px] font-mono text-[var(--brand-primary)] font-bold">
+              <span className="text-[9px] font-mono text-[var(--brand-primary)] font-bold leading-none">
                 {progress.xpPoints} XP
               </span>
             </div>
@@ -183,7 +240,7 @@ export function Navbar() {
 
           {/* Streak Counter */}
           <div
-            className="hidden sm:flex items-center space-x-1 px-2 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-mono font-bold"
+            className="hidden md:flex items-center space-x-1 px-2 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-mono font-bold shrink-0"
             title="Daily Study Streak"
           >
             <Flame className="w-3.5 h-3.5 fill-current text-orange-500 animate-pulse" />
@@ -316,7 +373,7 @@ export function Navbar() {
             Navigation Menu
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {navLinks.map((link) => {
+            {allNavLinks.map((link) => {
               const Icon = link.icon;
               const isActive =
                 pathname === link.href ||

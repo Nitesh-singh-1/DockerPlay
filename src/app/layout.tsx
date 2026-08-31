@@ -23,6 +23,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#090d16',
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://dockerplay.org'),
   title: {
@@ -75,12 +82,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://dockerplay.org',
   },
-};
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -146,7 +147,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="h-screen w-screen overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] antialiased flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-800">
+      <body className="h-screen w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] antialiased flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-800">
         <ThemeProvider>
           <Navbar />
           <main className="flex-1 min-h-0 h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col">

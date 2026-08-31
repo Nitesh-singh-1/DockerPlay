@@ -45,15 +45,15 @@ export default function MissionsPage() {
     window.dispatchEvent(
       new CustomEvent('dockerplay-run-command', { detail: { command: cmd } })
     );
-    if (window.innerWidth < 1280) {
+    if (window.innerWidth < 1024) {
       setMobileTab('terminal');
     }
   };
 
   return (
-    <div className="flex flex-col xl:flex-row h-full w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors select-text">
+    <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors select-text">
       {/* Mobile / Tablet Tab Selector Bar */}
-      <div className="xl:hidden shrink-0 h-11 bg-[var(--bg-header)] border-b border-[var(--border-color)] px-3 flex items-center justify-between z-30">
+      <div className="lg:hidden shrink-0 h-11 bg-[var(--bg-header)] border-b border-[var(--border-color)] px-3 flex items-center justify-between z-30">
         <div className="flex items-center space-x-1 w-full max-w-md mx-auto">
           <button
             onClick={() => setMobileTab('mission')}
@@ -95,15 +95,15 @@ export default function MissionsPage() {
 
       {/* 1. LEFT PANE: Mission List Sidebar */}
       <aside
-        className={`w-full xl:w-68 2xl:w-72 h-full shrink-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col overflow-hidden shadow-sm z-10 ${
-          mobileTab === 'list' ? 'flex' : 'hidden xl:flex'
-        } ${!isSidebarOpen && 'xl:hidden'}`}
+        className={`w-full lg:w-56 xl:w-64 2xl:w-72 h-full shrink-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] flex flex-col overflow-hidden shadow-sm z-10 ${
+          mobileTab === 'list' ? 'flex' : 'hidden lg:flex'
+        } ${!isSidebarOpen && 'lg:hidden'}`}
       >
-        <div className="p-3.5 border-b border-[var(--border-color)] shrink-0 flex items-center justify-between bg-[var(--bg-header)]">
+        <div className="p-3 border-b border-[var(--border-color)] shrink-0 flex items-center justify-between bg-[var(--bg-header)]">
           <div className="flex items-center space-x-2">
             <Target className="w-4 h-4 text-[var(--brand-primary)]" />
             <span className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono">
-              Docker Quests
+              Quests
             </span>
           </div>
           <div className="flex items-center space-x-1">
@@ -112,7 +112,7 @@ export default function MissionsPage() {
             </span>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="hidden xl:block p-1 rounded-lg hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              className="hidden lg:block p-1 rounded-lg hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               title="Collapse Quests List"
             >
               <PanelLeftClose className="w-4 h-4" />
@@ -156,10 +156,23 @@ export default function MissionsPage() {
         </nav>
       </aside>
 
+      {/* Collapsed Sidebar Toggle (Desktop Only) */}
+      {!isSidebarOpen && (
+        <div className="hidden lg:flex shrink-0 h-full border-r border-[var(--border-color)] bg-[var(--bg-card)] p-1.5 flex-col items-center">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 rounded-xl hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors"
+            title="Open Quests List"
+          >
+            <PanelLeftOpen className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* 2. CENTER PANE: Mission Details */}
       <main
-        className={`flex-1 min-w-0 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[var(--bg-page)] space-y-6 relative ${
-          mobileTab === 'mission' ? 'block' : 'hidden xl:block'
+        className={`flex-1 min-w-0 h-full overflow-y-auto p-4 sm:p-6 lg:p-6 xl:p-8 bg-[var(--bg-page)] space-y-6 relative ${
+          mobileTab === 'mission' ? 'block' : 'hidden lg:block'
         }`}
       >
         <div className="max-w-3xl mx-auto space-y-6 pb-20">
@@ -265,7 +278,7 @@ export default function MissionsPage() {
         </div>
 
         {/* Mobile Floating Quick Terminal Button */}
-        <div className="xl:hidden fixed bottom-4 right-4 z-30">
+        <div className="lg:hidden fixed bottom-4 right-4 z-30">
           <button
             onClick={() => setMobileTab('terminal')}
             className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-white font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
@@ -278,9 +291,9 @@ export default function MissionsPage() {
 
       {/* 3. RIGHT PANE: Interactive Terminal */}
       <section
-        className={`w-full xl:w-[480px] 2xl:w-[540px] h-full shrink-0 bg-[var(--bg-card)] border-l border-[var(--border-color)] flex flex-col overflow-hidden shadow-2xl z-10 ${
-          mobileTab === 'terminal' ? 'flex' : 'hidden xl:flex'
-        } ${!isTerminalOpen && 'xl:hidden'}`}
+        className={`w-full lg:w-[380px] xl:w-[440px] 2xl:w-[500px] h-full shrink-0 bg-[var(--bg-card)] border-l border-[var(--border-color)] flex flex-col overflow-hidden shadow-2xl z-10 ${
+          mobileTab === 'terminal' ? 'flex' : 'hidden lg:flex'
+        } ${!isTerminalOpen && 'lg:hidden'}`}
       >
         <div className="p-2 sm:p-2.5 h-full min-h-0 w-full flex flex-col overflow-hidden">
           <DockerTerminal className="h-full w-full min-h-0" />
