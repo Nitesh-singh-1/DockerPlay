@@ -1,7 +1,5 @@
 import { MetadataRoute } from 'next';
 import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
-import { DOCKER_MISSIONS } from '@/data/missions';
-import { TROUBLESHOOTING_CHALLENGES } from '@/data/troubleshooting';
 
 export const dynamic = 'force-static';
 
@@ -12,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Core Static Routes
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
+      url: `${baseUrl}/`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 1.0,
@@ -22,6 +20,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/curriculum/`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/tools/`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/dashboard/`,
@@ -51,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/tools/network-visualizer/`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.75,
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/tools/compose-studio/`,

@@ -53,7 +53,7 @@ export default function LandingPage() {
         {/* CTA Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3.5 pt-3">
           <Link
-            href="/playground"
+            href="/playground/"
             className="flex items-center space-x-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-400 text-slate-950 font-bold text-sm shadow-xl shadow-cyan-500/25 hover:brightness-110 transition-all hover:scale-[1.02]"
           >
             <Terminal className="w-4 h-4" />
@@ -62,7 +62,7 @@ export default function LandingPage() {
           </Link>
 
           <Link
-            href="/curriculum/ch-01"
+            href="/curriculum/what-is-docker/"
             className="flex items-center space-x-2 px-7 py-3.5 rounded-2xl bg-slate-900/90 border border-white/10 text-slate-200 font-bold text-sm hover:bg-slate-800 hover:border-cyan-500/40 transition-all shadow-lg"
           >
             <Layers className="w-4 h-4 text-cyan-400" />
@@ -118,7 +118,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1 */}
           <Link
-            href="/playground"
+            href="/playground/"
             className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-cyan-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
             <div className="space-y-3">
@@ -136,7 +136,7 @@ export default function LandingPage() {
 
           {/* Card 2 */}
           <Link
-            href="/tools/network-visualizer"
+            href="/tools/network-visualizer/"
             className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-indigo-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
             <div className="space-y-3">
@@ -154,7 +154,7 @@ export default function LandingPage() {
 
           {/* Card 3 */}
           <Link
-            href="/tools/compose-studio"
+            href="/tools/compose-studio/"
             className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-emerald-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
             <div className="space-y-3">
@@ -172,7 +172,7 @@ export default function LandingPage() {
 
           {/* Card 4 */}
           <Link
-            href="/tools/dockerfile-studio"
+            href="/tools/dockerfile-studio/"
             className="p-5 rounded-3xl bg-slate-900/50 border border-white/10 hover:border-amber-500/40 hover:bg-slate-900/90 transition-all space-y-3 group shadow-xl flex flex-col justify-between"
           >
             <div className="space-y-3">

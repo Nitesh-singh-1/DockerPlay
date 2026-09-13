@@ -12,7 +12,7 @@ export default function NotFound() {
         The requested chapter, mission, or tool route does not exist in the Docker Playground.
       </p>
       <Link
-        href="/playground"
+        href="/playground/"
         className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl bg-[var(--brand-primary)] text-white font-bold text-xs shadow-md hover:brightness-110 transition-all"
       >
         <ArrowLeft className="w-4 h-4" />

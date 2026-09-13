@@ -166,7 +166,7 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-400 leading-relaxed">{nextChapter.summary}</p>
           </div>
           <Link
-            href={`/curriculum/${nextChapter.slug}`}
+            href={`/curriculum/${nextChapter.slug}/`}
             className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-cyan-500/20 w-fit"
           >
             <span>Continue Chapter 0{nextChapter.order}</span>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-400 leading-relaxed">{nextMission.scenario}</p>
           </div>
           <Link
-            href="/missions"
+            href="/missions/"
             className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-amber-500/20 w-fit"
           >
             <span>Launch Mission {nextMission.number}</span>

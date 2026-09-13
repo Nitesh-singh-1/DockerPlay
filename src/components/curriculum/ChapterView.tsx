@@ -152,7 +152,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
             return (
               <Link
                 key={ch.id}
-                href={`/curriculum/${ch.slug}`}
+                href={`/curriculum/${ch.slug}/`}
                 onClick={() => setMobileTab('lesson')}
                 className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all ${
                   isSelected
@@ -311,7 +311,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
           <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)] text-xs">
             {prevChapter ? (
               <Link
-                href={`/curriculum/${prevChapter.slug}`}
+                href={`/curriculum/${prevChapter.slug}/`}
                 className="flex items-center space-x-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] font-semibold"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -321,7 +321,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
 
             {nextChapter && (
               <Link
-                href={`/curriculum/${nextChapter.slug}`}
+                href={`/curriculum/${nextChapter.slug}/`}
                 className="flex items-center space-x-1.5 text-[var(--brand-primary)] font-bold hover:underline ml-auto"
               >
                 <span>Next: {nextChapter.title}</span>

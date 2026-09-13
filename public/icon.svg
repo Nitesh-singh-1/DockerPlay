@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38ef7d" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </linearGradient>
+  </defs>
+
+  <!-- Modern App Icon Container -->
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="url(#bgGrad)" stroke="#0ea5e9" stroke-opacity="0.4" stroke-width="12" />
+
+  <!-- Subtle grid pattern in icon background -->
+  <path d="M 120 48 L 120 464 M 256 48 L 256 464 M 392 48 L 392 464 M 48 120 L 464 120 M 48 256 L 464 256 M 48 392 L 464 392" stroke="#38bdf8" stroke-opacity="0.06" stroke-width="2" />
+
+  <!-- Docker Container Blocks Stack -->
+  <!-- Top Tier -->
+  <rect x="136" y="146" width="64" height="58" rx="10" fill="url(#brandGrad)" />
+  <rect x="212" y="146" width="64" height="58" rx="10" fill="url(#brandGrad)" />
+
+  <!-- Middle Tier -->
+  <rect x="136" y="216" width="64" height="58" rx="10" fill="url(#brandGrad)" />
+  <rect x="212" y="216" width="64" height="58" rx="10" fill="url(#brandGrad)" />
+
+  <!-- Container Hull / Curved Base -->
+  <path d="M 96 292 C 96 292 108 376 256 376 C 404 376 416 292 416 292 L 96 292 Z" fill="url(#brandGrad)" />
+
+  <!-- Interactive Glowing Play Badge on Right -->
+  <circle cx="342" cy="216" r="76" fill="#090d16" stroke="#38bdf8" stroke-width="10" />
+  <polygon points="324,180 324,252 378,216" fill="url(#playGrad)" />
+
+  <!-- Terminal Prompt Accent on Hull -->
+  <path d="M 190 328 L 208 340 L 190 352" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <line x1="220" y1="352" x2="244" y2="352" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round" />
+</svg>

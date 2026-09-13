@@ -65,17 +65,17 @@ export function Navbar() {
   const levelInfo = ProgressManager.getLevelInfo(progress.xpPoints || 50);
 
   const primaryNavLinks = [
-    { href: '/playground', label: 'Playground', icon: Terminal },
-    { href: '/curriculum/what-is-docker', label: 'Curriculum', icon: BookOpen },
-    { href: '/missions', label: 'Missions', icon: Target },
-    { href: '/break-fix', label: 'Break/Fix', icon: Wrench },
+    { href: '/playground/', label: 'Playground', icon: Terminal },
+    { href: '/curriculum/', label: 'Curriculum', icon: BookOpen },
+    { href: '/missions/', label: 'Missions', icon: Target },
+    { href: '/break-fix/', label: 'Break/Fix', icon: Wrench },
   ];
 
   const toolsNavLinks = [
-    { href: '/tools/compose-studio', label: 'Compose Studio', icon: Box, desc: 'Multi-service YAML editor & visualizer' },
-    { href: '/tools/dockerfile-studio', label: 'Dockerfile Studio', icon: FileCode, desc: 'Multi-stage image builder & layer cache' },
-    { href: '/tools/network-visualizer', label: 'Network Tracer', icon: Network, desc: 'Bridge packet tracer & DNS 127.0.0.11' },
-    { href: '/tools/cheat-sheet', label: 'Cheat Sheet', icon: HelpCircle, desc: 'Categorized CLI command reference' },
+    { href: '/tools/compose-studio/', label: 'Compose Studio', icon: Box, desc: 'Multi-service YAML editor & visualizer' },
+    { href: '/tools/dockerfile-studio/', label: 'Dockerfile Studio', icon: FileCode, desc: 'Multi-stage image builder & layer cache' },
+    { href: '/tools/network-visualizer/', label: 'Network Tracer', icon: Network, desc: 'Bridge packet tracer & DNS 127.0.0.11' },
+    { href: '/tools/cheat-sheet/', label: 'Cheat Sheet', icon: HelpCircle, desc: 'Categorized CLI command reference' },
   ];
 
   const allNavLinks = [
@@ -224,7 +224,7 @@ export function Navbar() {
         <div className="flex items-center space-x-1.5 sm:space-x-2">
           {/* Level & XP Widget */}
           <Link
-            href="/dashboard"
+            href="/dashboard/"
             className="flex items-center space-x-1.5 px-2 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-primary)] transition-all shadow-sm"
             title={`${levelInfo.progressXP} / 200 XP to next level`}
           >
