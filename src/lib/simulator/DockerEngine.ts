@@ -289,6 +289,16 @@ export class DockerEngine {
           return this.handleInspect(parsed);
         } else if (parsed.subcommand === 'prune') {
           return this.handleImagePrune(parsed);
+        } else if (parsed.subcommand === 'pull') {
+          return this.handlePull(parsed);
+        } else if (parsed.subcommand === 'build') {
+          return this.handleBuild(parsed);
+        } else if (parsed.subcommand === 'tag') {
+          return this.handleTag(parsed);
+        } else if (parsed.subcommand === 'history') {
+          return this.handleHistory(parsed);
+        } else if (parsed.subcommand === 'push') {
+          return this.handlePush(parsed);
         }
         return this.handleImages(parsed);
       case 'pull':
@@ -327,6 +337,28 @@ export class DockerEngine {
         return this.handleBuild(parsed);
       case 'tag':
         return this.handleTag(parsed);
+      case 'container':
+        return this.handleContainerCommand(parsed);
+      case 'system':
+        return this.handleSystem(parsed);
+      case 'info':
+        return this.handleInfo();
+      case 'commit':
+        return this.handleCommit(parsed);
+      case 'cp':
+        return this.handleCp(parsed);
+      case 'history':
+        return this.handleHistory(parsed);
+      case 'rename':
+        return this.handleRename(parsed);
+      case 'port':
+        return this.handlePort(parsed);
+      case 'push':
+        return this.handlePush(parsed);
+      case 'login':
+        return this.handleLogin(parsed);
+      case 'logout':
+        return { stdout: 'Removing login credentials for https://index.docker.io/v1/', stderr: '', exitCode: 0 };
       case 'version':
         return {
           stdout: `Client: Docker Engine - Community\n Version:           27.1.1\n API version:       1.46\n Go version:        go1.22.5\n Git commit:        6312585\n Built:             Fri Jul 19 12:00:00 2026\n OS/Arch:           linux/amd64\n Context:           default\n\nServer: Docker Engine - Community\n Engine:\n  Version:          27.1.1\n  API version:      1.46 (minimum version 1.24)\n  Go version:       go1.22.5\n  Git commit:       cc13f95\n  Built:            Fri Jul 19 12:00:00 2026\n  OS/Arch:          linux/amd64\n  Experimental:     false`,
@@ -1807,6 +1839,384 @@ export class DockerEngine {
     this.state.images[tgtKey] = { ...img, repository: tgtKey.split(':')[0], tag: tgtKey.split(':')[1] };
     this.notify();
     return { stdout: '', stderr: '', exitCode: 0 };
+  }
+
+  /**
+   * `docker container <subcommand>` — modern management form; routes to the
+   * same handlers as the short forms (`docker ps`, `docker run`, ...).
+   */
+  private handleContainerCommand(parsed: ParsedCommand): CommandExecutionResult {
+    const sub = parsed.subcommand || parsed.positionalArgs[0] || 'ls';
+    switch (sub) {
+      case 'ls':
+      case 'ps': return this.handlePs(parsed);
+      case 'run': return this.handleRun(parsed, true);
+      case 'create': return this.handleRun(parsed, false);
+      case 'start': return this.handleStart(parsed);
+      case 'stop': return this.handleStop(parsed);
+      case 'restart': return this.handleRestart(parsed);
+      case 'kill': return this.handleKill(parsed);
+      case 'pause': return this.handlePause(parsed);
+      case 'unpause': return this.handleUnpause(parsed);
+      case 'rm': return this.handleRm(parsed);
+      case 'logs': return this.handleLogs(parsed);
+      case 'exec': return this.handleExec(parsed);
+      case 'inspect': return this.handleInspect(parsed);
+      case 'stats': return this.handleStats(parsed);
+      case 'top': return this.handleTop(parsed);
+      case 'rename': return this.handleRename(parsed);
+      case 'port': return this.handlePort(parsed);
+      case 'commit': return this.handleCommit(parsed);
+      case 'cp': return this.handleCp(parsed);
+      case 'prune': return this.handleContainerPrune(parsed);
+      default:
+        return { stdout: '', stderr: `docker: 'container ${sub}' is not a docker command.\nSee 'docker container --help'`, exitCode: 1 };
+    }
+  }
+
+  /**
+   * `docker system <subcommand>` — info, df, prune.
+   */
+  private handleSystem(parsed: ParsedCommand): CommandExecutionResult {
+    const sub = parsed.subcommand || parsed.positionalArgs[0] || 'info';
+    if (sub === 'info') return this.handleInfo();
+    if (sub === 'df') return this.handleSystemDf();
+    if (sub === 'prune') return this.handleSystemPrune(parsed);
+    return { stdout: '', stderr: `docker: 'system ${sub}' is not a docker command.\nSee 'docker system --help'`, exitCode: 1 };
+  }
+
+  /**
+   * `docker info` — system-wide information.
+   */
+  private handleInfo(): CommandExecutionResult {
+    const containers = Object.values(this.state.containers);
+    const running = containers.filter((c) => c.status === 'running').length;
+    const paused = containers.filter((c) => c.status === 'paused').length;
+    const stopped = containers.length - running - paused;
+    const images = Object.keys(this.state.images).length;
+    return {
+      stdout: `Client:\n Version:    27.1.1\n Context:    default\n\nServer:\n Containers: ${containers.length}\n  Running: ${running}\n  Paused: ${paused}\n  Stopped: ${stopped}\n Images: ${images}\n Server Version: 27.1.1\n Storage Driver: overlay2\n  Backing Filesystem: extfs\n Logging Driver: json-file\n Cgroup Driver: systemd\n Cgroup Version: 2\n Default Runtime: runc\n Kernel Version: 6.8.0-45-generic\n Operating System: Docker Desktop\n OSType: linux\n Architecture: x86_64\n CPUs: 8\n Total Memory: 15.61GiB\n Docker Root Dir: /var/lib/docker\n Registry: https://index.docker.io/v1/`,
+      stderr: '',
+      exitCode: 0,
+    };
+  }
+
+  /**
+   * `docker system df` — disk usage summary.
+   */
+  private handleSystemDf(): CommandExecutionResult {
+    const images = Object.values(this.state.images);
+    const containers = Object.values(this.state.containers);
+    const volumes = Object.values(this.state.volumes);
+    const activeImageIds = new Set(containers.map((c) => c.imageId));
+    const imgSize = images.reduce((s, i) => s + i.sizeMb, 0);
+    const volSize = volumes.reduce((s, v) => s + (v.sizeMb || 0), 0);
+    const reclaimImg = images.filter((i) => !activeImageIds.has(i.id)).reduce((s, i) => s + i.sizeMb, 0);
+    const header = 'TYPE            TOTAL     ACTIVE    SIZE        RECLAIMABLE';
+    const rows = [
+      `Images          ${String(images.length).padEnd(9)} ${String(activeImageIds.size).padEnd(9)} ${(imgSize + 'MB').padEnd(11)} ${reclaimImg}MB`,
+      `Containers      ${String(containers.length).padEnd(9)} ${String(containers.filter((c) => c.status === 'running').length).padEnd(9)} ${'0MB'.padEnd(11)} 0MB`,
+      `Local Volumes   ${String(volumes.length).padEnd(9)} ${String(volumes.length).padEnd(9)} ${(volSize + 'MB').padEnd(11)} 0MB`,
+      `Build Cache     0         0         0MB         0MB`,
+    ];
+    return { stdout: [header, ...rows].join('\n'), stderr: '', exitCode: 0 };
+  }
+
+  /**
+   * `docker system prune` — remove stopped containers, unused networks and images.
+   */
+  private handleSystemPrune(parsed: ParsedCommand): CommandExecutionResult {
+    const all = Boolean(parsed.flags.all || parsed.flags.a);
+    const withVolumes = Boolean(parsed.flags.volumes);
+    let reclaimed = 0;
+
+    const removedContainers: string[] = [];
+    for (const c of Object.values(this.state.containers)) {
+      if (c.status === 'running' || c.status === 'paused' || c.status === 'restarting') continue;
+      for (const net of Object.values(this.state.networks)) net.containers = net.containers.filter((cid) => cid !== c.id);
+      delete this.state.containers[c.id];
+      removedContainers.push(c.id.slice(0, 12));
+      this.recordEvent('container', 'destroy', c.id, c.name);
+    }
+
+    const removedNetworks: string[] = [];
+    for (const net of Object.values(this.state.networks)) {
+      if (!['bridge', 'host', 'none'].includes(net.name) && net.containers.length === 0) {
+        removedNetworks.push(net.name);
+        delete this.state.networks[net.id];
+        this.recordEvent('network', 'destroy', net.id, net.name);
+      }
+    }
+
+    const usedImageIds = new Set(Object.values(this.state.containers).map((c) => c.imageId));
+    const removedImages: string[] = [];
+    if (all) {
+      for (const [key, img] of Object.entries(this.state.images)) {
+        if (!usedImageIds.has(img.id)) {
+          reclaimed += img.sizeMb;
+          removedImages.push(key);
+          delete this.state.images[key];
+          this.recordEvent('image', 'destroy', img.id, key);
+        }
+      }
+    }
+
+    const removedVolumes: string[] = [];
+    if (withVolumes) {
+      const mounted = new Set(Object.values(this.state.containers).flatMap((c) => c.mounts.map((m) => m.source)));
+      for (const [key, vol] of Object.entries(this.state.volumes)) {
+        if (!mounted.has(vol.name)) {
+          reclaimed += vol.sizeMb || 0;
+          removedVolumes.push(key);
+          delete this.state.volumes[key];
+          this.recordEvent('volume', 'destroy', vol.id, vol.name);
+        }
+      }
+    }
+
+    this.notify();
+    const lines: string[] = [];
+    if (removedContainers.length) lines.push('Deleted Containers:', ...removedContainers);
+    if (removedNetworks.length) lines.push('Deleted Networks:', ...removedNetworks);
+    if (removedImages.length) lines.push('Deleted Images:', ...removedImages);
+    if (removedVolumes.length) lines.push('Deleted Volumes:', ...removedVolumes);
+    lines.push(`Total reclaimed space: ${reclaimed}MB`);
+    return {
+      stdout: lines.join('\n'),
+      stderr: '',
+      exitCode: 0,
+      explanation: {
+        title: 'Pruned unused Docker objects',
+        summary: 'Removed stopped containers, unused user-defined networks' + (all ? ', and all unused images' : ' and dangling images') + (withVolumes ? ', plus unused volumes.' : '.'),
+        steps: [
+          `Removed ${removedContainers.length} stopped container(s).`,
+          `Removed ${removedNetworks.length} unused network(s).`,
+          `Reclaimed ${reclaimed}MB of disk space.`,
+        ],
+        why: 'Pruning reclaims disk space from objects no longer referenced by any running workload.',
+      },
+    };
+  }
+
+  /**
+   * `docker container prune` — remove only stopped containers.
+   */
+  private handleContainerPrune(parsed: ParsedCommand): CommandExecutionResult {
+    void parsed;
+    const removed: string[] = [];
+    for (const c of Object.values(this.state.containers)) {
+      if (c.status === 'running' || c.status === 'paused' || c.status === 'restarting') continue;
+      for (const net of Object.values(this.state.networks)) net.containers = net.containers.filter((cid) => cid !== c.id);
+      delete this.state.containers[c.id];
+      removed.push(c.id.slice(0, 12));
+      this.recordEvent('container', 'destroy', c.id, c.name);
+    }
+    this.notify();
+    return {
+      stdout: (removed.length ? `Deleted Containers:\n${removed.join('\n')}\n` : '') + 'Total reclaimed space: 0B',
+      stderr: '',
+      exitCode: 0,
+    };
+  }
+
+  /**
+   * `docker commit` — snapshot a container into a new image.
+   */
+  private handleCommit(parsed: ParsedCommand): CommandExecutionResult {
+    const cname = parsed.positionalArgs[0];
+    if (!cname) {
+      return { stdout: '', stderr: '"docker commit" requires at least 1 argument.\nUsage:  docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]', exitCode: 1 };
+    }
+    const container = this.findContainer(cname);
+    if (!container) {
+      return { stdout: '', stderr: `Error response from daemon: No such container: ${cname}`, exitCode: 1 };
+    }
+    const ref = parsed.positionalArgs[1];
+    const key = ref ? (ref.includes(':') ? ref : `${ref}:latest`) : `${container.name}:committed`;
+    const base = this.state.images[container.image];
+    const newImg: DockerImage = {
+      id: `sha256:${this.generateId(12)}`,
+      repository: key.split(':')[0],
+      tag: key.split(':')[1] || 'latest',
+      sizeMb: (base?.sizeMb || 100) + 5,
+      created: Date.now(),
+      exposedPorts: base?.exposedPorts ? [...base.exposedPorts] : [],
+      env: base?.env ? { ...base.env } : {},
+      workdir: base?.workdir || '/',
+      cmd: base?.cmd ? [...base.cmd] : ['sh'],
+      layers: [
+        ...(base?.layers || []),
+        { id: `sha256:${this.generateId(8)}`, instruction: `#(commit) from ${container.name}`, sizeMb: 5, cached: false, command: `commit ${container.name}` },
+      ],
+    };
+    this.state.images[key] = newImg;
+    this.recordEvent('image', 'build', newImg.id, key);
+    this.notify();
+    return {
+      stdout: newImg.id,
+      stderr: '',
+      exitCode: 0,
+      explanation: {
+        title: `Committed container "${container.name}" to image "${key}"`,
+        summary: "Froze the container's read-write layer into a new immutable image.",
+        steps: [
+          'Paused writes to the container filesystem.',
+          'Captured the diff of the read-write layer as a new layer.',
+          `Created image ${newImg.id.slice(0, 19)} tagged ${key}.`,
+        ],
+        why: 'docker commit snapshots a running container into an image — great for quick experiments, though Dockerfiles are preferred for reproducible builds.',
+      },
+    };
+  }
+
+  /**
+   * `docker cp` — copy files between host and container (simulated).
+   */
+  private handleCp(parsed: ParsedCommand): CommandExecutionResult {
+    const src = parsed.positionalArgs[0];
+    const dest = parsed.positionalArgs[1];
+    if (!src || !dest) {
+      return { stdout: '', stderr: '"docker cp" requires 2 arguments.\nUsage:  docker cp SRC_PATH|CONTAINER:SRC_PATH DEST_PATH|CONTAINER:DEST_PATH', exitCode: 1 };
+    }
+    const ref = src.includes(':') ? src : dest.includes(':') ? dest : null;
+    if (ref) {
+      const cname = ref.split(':')[0];
+      if (!this.findContainer(cname)) {
+        return { stdout: '', stderr: `Error response from daemon: No such container: ${cname}`, exitCode: 1 };
+      }
+    }
+    return {
+      stdout: '',
+      stderr: '',
+      exitCode: 0,
+      explanation: {
+        title: 'Copied files between host and container',
+        summary: `Transferred ${src} → ${dest}.`,
+        steps: [
+          'Resolved the container filesystem mount point.',
+          'Streamed a tar archive of the path across the boundary.',
+        ],
+        why: 'docker cp moves files in or out of a container without a shared volume — handy for grabbing logs or seeding a config file.',
+      },
+    };
+  }
+
+  /**
+   * `docker history` — show the layer history of an image.
+   */
+  private handleHistory(parsed: ParsedCommand): CommandExecutionResult {
+    const target = parsed.positionalArgs[0];
+    if (!target) {
+      return { stdout: '', stderr: '"docker history" requires exactly 1 argument.', exitCode: 1 };
+    }
+    const key = target.includes(':') ? target : `${target}:latest`;
+    const img = this.state.images[key] || Object.values(this.state.images).find((i) => i.id.includes(target));
+    if (!img) {
+      return { stdout: '', stderr: `Error response from daemon: No such image: ${target}`, exitCode: 1 };
+    }
+    const header = 'IMAGE          CREATED          CREATED BY                                      SIZE';
+    const layers = [...img.layers].reverse();
+    const rows = layers.map((l, idx) => {
+      const id = (idx === 0 ? img.id.replace('sha256:', '').slice(0, 12) : '<missing>').padEnd(14);
+      const created = this.formatTimeAgo(img.created).padEnd(16);
+      const by = (l.instruction.length > 44 ? l.instruction.slice(0, 44) : l.instruction).padEnd(47);
+      return `${id} ${created} ${by} ${l.sizeMb}MB`;
+    });
+    return { stdout: [header, ...rows].join('\n'), stderr: '', exitCode: 0 };
+  }
+
+  /**
+   * `docker rename` — rename a container.
+   */
+  private handleRename(parsed: ParsedCommand): CommandExecutionResult {
+    const oldName = parsed.positionalArgs[0];
+    const newName = parsed.positionalArgs[1];
+    if (!oldName || !newName) {
+      return { stdout: '', stderr: '"docker rename" requires exactly 2 arguments.\nUsage:  docker rename CONTAINER NEW_NAME', exitCode: 1 };
+    }
+    const container = this.findContainer(oldName);
+    if (!container) {
+      return { stdout: '', stderr: `Error response from daemon: No such container: ${oldName}`, exitCode: 1 };
+    }
+    if (this.findContainer(newName)) {
+      return { stdout: '', stderr: `Error response from daemon: rename: container name "/${newName}" is already in use`, exitCode: 1 };
+    }
+    const prev = container.name;
+    container.name = newName;
+    for (const cfg of Object.values(container.networks)) {
+      cfg.aliases = cfg.aliases.map((a) => (a === prev ? newName : a));
+    }
+    this.recordEvent('container', 'rename', container.id, newName, { from: prev });
+    this.notify();
+    return { stdout: '', stderr: '', exitCode: 0 };
+  }
+
+  /**
+   * `docker port` — list a container's published port mappings.
+   */
+  private handlePort(parsed: ParsedCommand): CommandExecutionResult {
+    const target = parsed.positionalArgs[0];
+    if (!target) {
+      return { stdout: '', stderr: '"docker port" requires at least 1 argument.', exitCode: 1 };
+    }
+    const container = this.findContainer(target);
+    if (!container) {
+      return { stdout: '', stderr: `Error response from daemon: No such container: ${target}`, exitCode: 1 };
+    }
+    if (container.ports.length === 0) {
+      return { stdout: '', stderr: '', exitCode: 0 };
+    }
+    const lines = container.ports.map((p) => `${p.containerPort}/${p.protocol} -> 0.0.0.0:${p.hostPort}`);
+    return { stdout: lines.join('\n'), stderr: '', exitCode: 0 };
+  }
+
+  /**
+   * `docker push` — upload an image to a registry (simulated).
+   */
+  private handlePush(parsed: ParsedCommand): CommandExecutionResult {
+    const ref = parsed.positionalArgs[0];
+    if (!ref) {
+      return { stdout: '', stderr: '"docker push" requires exactly 1 argument.', exitCode: 1 };
+    }
+    const key = ref.includes(':') ? ref : `${ref}:latest`;
+    const img = this.state.images[key] || Object.values(this.state.images).find((i) => `${i.repository}:${i.tag}` === key);
+    if (!img) {
+      return { stdout: '', stderr: `An image does not exist locally with the tag: ${ref}`, exitCode: 1 };
+    }
+    const digest = this.generateId(32);
+    return {
+      stdout: `The push refers to repository [docker.io/${img.repository}]\n${img.layers.map(() => `${this.generateId(12)}: Pushed`).join('\n')}\n${img.tag}: digest: sha256:${digest} size: ${img.sizeMb * 10}`,
+      stderr: '',
+      exitCode: 0,
+      explanation: {
+        title: `Pushed "${key}" to Docker Hub (simulated)`,
+        summary: 'Uploaded each image layer to the registry. In real Docker you must run "docker login" first and own the repository namespace.',
+        steps: [
+          'Authenticated against the registry.',
+          'Uploaded layers not already present remotely.',
+          'Published the tag manifest.',
+        ],
+        why: 'Pushing shares your image so it can be pulled and run anywhere. This playground simulates the upload — no real registry is contacted.',
+      },
+    };
+  }
+
+  /**
+   * `docker login` — authenticate to a registry (simulated).
+   */
+  private handleLogin(parsed: ParsedCommand): CommandExecutionResult {
+    const server = parsed.positionalArgs[0] || 'https://index.docker.io/v1/';
+    return {
+      stdout: 'WARNING! Your password will be stored unencrypted in /root/.docker/config.json.\nLogin Succeeded',
+      stderr: '',
+      exitCode: 0,
+      explanation: {
+        title: `Logged in to ${server} (simulated)`,
+        summary: 'Stored registry credentials so you can push and pull private images.',
+        steps: ['Validated credentials with the registry.', 'Saved an auth token to the Docker config.'],
+        why: 'Logging in authorizes push/pull against private repositories. This playground simulates authentication.',
+      },
+    };
   }
 
   /**

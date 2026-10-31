@@ -159,14 +159,27 @@ export class CommandParser {
 
     // Check for subcommands like `docker network create`, `docker volume ls`, `docker image inspect`, `docker container ls`
     let subcommand: string | undefined = undefined;
-    const subresourceCommands = ['network', 'volume', 'image', 'container'];
+    const subresourceCommands = ['network', 'volume', 'image', 'container', 'system'];
     if (subresourceCommands.includes(command) && startIndex < tokens.length && !tokens[startIndex].startsWith('-')) {
       subcommand = tokens[startIndex].toLowerCase();
       startIndex++;
     }
 
-    // Get Schema for Command
-    const schema = DOCKER_COMMAND_SCHEMAS[command];
+    // Get Schema for Command. For management forms like `docker container run`
+    // or `docker image ls`, validate flags against the subcommand's own schema
+    // so the full flag set (e.g. -d, -p) is accepted just like the short form.
+    let schema = DOCKER_COMMAND_SCHEMAS[command];
+    if ((command === 'container' || command === 'image') && subcommand) {
+      const subAlias: Record<string, string> = {
+        ls: command === 'image' ? 'images' : 'ps',
+        rm: command === 'image' ? 'rmi' : 'rm',
+        rmi: 'rmi',
+      };
+      const subKey = DOCKER_COMMAND_SCHEMAS[subcommand] ? subcommand : subAlias[subcommand];
+      if (subKey && DOCKER_COMMAND_SCHEMAS[subKey]) {
+        schema = DOCKER_COMMAND_SCHEMAS[subKey];
+      }
+    }
 
     // If command is unknown
     if (!schema && command !== 'version') {

@@ -227,4 +227,80 @@ export const COMMAND_SUGGESTIONS: CommandSuggestion[] = [
     example: 'docker compose restart backend',
     category: 'compose',
   },
+
+  // Container image authoring & registry
+  {
+    command: 'docker commit',
+    description: 'Create a new image from a container\'s changes',
+    syntax: 'docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]',
+    example: 'docker commit web myteam/web:patched',
+    category: 'images',
+  },
+  {
+    command: 'docker history',
+    description: 'Show the layer history of an image',
+    syntax: 'docker history [OPTIONS] IMAGE',
+    example: 'docker history nginx:alpine',
+    category: 'images',
+  },
+  {
+    command: 'docker push',
+    description: 'Upload an image to a registry (simulated)',
+    syntax: 'docker push [OPTIONS] NAME[:TAG]',
+    example: 'docker push myteam/web:1.0',
+    category: 'images',
+  },
+  {
+    command: 'docker login',
+    description: 'Log in to a container registry (simulated)',
+    syntax: 'docker login [OPTIONS] [SERVER]',
+    example: 'docker login',
+    category: 'system',
+  },
+
+  // Container management & files
+  {
+    command: 'docker rename',
+    description: 'Rename a container',
+    syntax: 'docker rename CONTAINER NEW_NAME',
+    example: 'docker rename web frontend',
+    category: 'containers',
+  },
+  {
+    command: 'docker port',
+    description: 'List a container\'s published port mappings',
+    syntax: 'docker port CONTAINER',
+    example: 'docker port web',
+    category: 'containers',
+  },
+  {
+    command: 'docker cp',
+    description: 'Copy files between a container and the host',
+    syntax: 'docker cp SRC DEST',
+    example: 'docker cp web:/etc/nginx/nginx.conf ./nginx.conf',
+    category: 'containers',
+  },
+
+  // System & cleanup
+  {
+    command: 'docker info',
+    description: 'Display system-wide information',
+    syntax: 'docker info',
+    example: 'docker info',
+    category: 'system',
+  },
+  {
+    command: 'docker system df',
+    description: 'Show Docker disk usage',
+    syntax: 'docker system df',
+    example: 'docker system df',
+    category: 'system',
+  },
+  {
+    command: 'docker system prune',
+    description: 'Remove unused containers, networks, and images',
+    syntax: 'docker system prune [OPTIONS]',
+    example: 'docker system prune -a --volumes',
+    category: 'system',
+  },
 ];
