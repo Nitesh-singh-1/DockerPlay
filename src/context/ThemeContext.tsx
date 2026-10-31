@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type ColorBrand = 'sky' | 'google' | 'whatsapp' | 'meta' | 'midnight';
+export type ColorBrand = 'harbor' | 'cargo' | 'blueprint' | 'sky' | 'midnight';
 export type Mode = 'light' | 'dark';
 
 interface ThemeContextType {
@@ -16,19 +16,26 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<Mode>('light');
-  const [brand, setBrandState] = useState<ColorBrand>('sky');
+  const [mode, setModeState] = useState<Mode>('dark');
+  const [brand, setBrandState] = useState<ColorBrand>('harbor');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
-      const savedMode = (localStorage.getItem('dockerplay_theme_mode') as Mode) || 'light';
-      const savedBrand = (localStorage.getItem('dockerplay_theme_brand') as ColorBrand) || 'sky';
+      const savedMode = (localStorage.getItem('dockerplay_theme_mode') as Mode) || 'dark';
+      let savedBrand = (localStorage.getItem('dockerplay_theme_brand') as ColorBrand) || 'harbor';
+
+      // Migrate any legacy vibe-coded brands to authentic Docker harbor theme
+      if (['google', 'whatsapp', 'meta'].includes(savedBrand as string)) {
+        savedBrand = 'harbor';
+        localStorage.setItem('dockerplay_theme_brand', 'harbor');
+      }
+
       setModeState(savedMode);
       setBrandState(savedBrand);
       applyTheme(savedMode, savedBrand);
     } catch {
-      applyTheme('light', 'sky');
+      applyTheme('dark', 'harbor');
     }
     setMounted(true);
   }, []);

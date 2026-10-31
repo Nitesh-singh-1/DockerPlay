@@ -3,157 +3,150 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   CSS DESIGN SYSTEM: LIGHT & DARK MODES WITH BRAND COLOR THEMES
-   (Clean Sky Blue, Google Cloud, WhatsApp Emerald, Meta Blue, Midnight)
+   CSS DESIGN SYSTEM: DOCKERPLAY HARBOR & PLAYGROUND PALETTE
+   Inspired by LearnGitBranching's tactile, cartoonish, approachable clarity
    ========================================================================== */
 
 :root,
-html.light {
-  --bg-page: #f8fafc;
-  --bg-subtle: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-header: rgba(255, 255, 255, 0.9);
-  --bg-terminal: #0f172a;
-  --bg-terminal-header: #090d16;
-
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
-
-  --border-color: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --border-highlight: rgba(2, 132, 199, 0.3);
-
-  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  --panel-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08);
-
-  /* Brand Default: Clean Sky Blue */
-  --brand-primary: #0284c7;
-  --brand-accent: #0ea5e9;
-  --brand-light: #e0f2fe;
-  --brand-text: #0369a1;
-  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-}
-
 html.dark {
-  --bg-page: #070b14;
-  --bg-subtle: #0b1120;
-  --bg-card: #0f172a;
-  --bg-card-hover: #1e293b;
-  --bg-header: rgba(11, 17, 32, 0.85);
-  --bg-terminal: #090d16;
-  --bg-terminal-header: #05080f;
+  /* Default: Harbor Night (Deep nautical harbor with playful, high-contrast nodes) */
+  --bg-page: #080e1a;
+  --bg-subtle: #0f182b;
+  --bg-card: #132238;
+  --bg-card-hover: #192c47;
+  --bg-header: rgba(11, 19, 34, 0.92);
+  --bg-terminal: #070d18;
+  --bg-terminal-header: #050912;
 
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverse: #0f172a;
+  --text-muted: #7e95b0;
+  --text-inverse: #080e1a;
 
-  --border-color: #1e293b;
-  --border-subtle: #111827;
-  --border-highlight: rgba(56, 189, 248, 0.3);
+  --border-color: #1e3352;
+  --border-subtle: #14233a;
+  --border-highlight: rgba(13, 183, 237, 0.45);
 
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  --panel-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+  --card-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --panel-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
 
-  --brand-primary: #38bdf8;
-  --brand-accent: #0ea5e9;
-  --brand-light: #082f49;
+  /* Primary Brand: Docker Whale Blue */
+  --brand-primary: #0db7ed;
+  --brand-accent: #38bdf8;
+  --brand-light: #0b2b4c;
   --brand-text: #7dd3fc;
-  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0db7ed 100%);
+
+  /* Cartoonish Node Colors (LearnGitBranching inspired) */
+  --node-container: #0284c7;
+  --node-running: #10b981;
+  --node-exited: #f43f5e;
+  --node-volume: #f59e0b;
+  --node-network: #06b6d4;
+  --node-image: #8b5cf6;
+  --node-compose: #ec4899;
+}
+
+html.light {
+  /* Harbor Light: Clean blueprint playground */
+  --bg-page: #f1f6fb;
+  --bg-subtle: #e4edf6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fbfe;
+  --bg-header: rgba(255, 255, 255, 0.94);
+  --bg-terminal: #080e1a;
+  --bg-terminal-header: #050912;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #627792;
+  --text-inverse: #ffffff;
+
+  --border-color: #d1e1ee;
+  --border-subtle: #e2edf6;
+  --border-highlight: rgba(2, 132, 199, 0.35);
+
+  --card-shadow: 0 2px 10px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --panel-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+
+  --brand-primary: #0284c7;
+  --brand-accent: #0db7ed;
+  --brand-light: #e0f2fe;
+  --brand-text: #0369a1;
+  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0db7ed 100%);
+
+  --node-container: #0284c7;
+  --node-running: #059669;
+  --node-exited: #e11d48;
+  --node-volume: #d97706;
+  --node-network: #0891b2;
+  --node-image: #7c3aed;
+  --node-compose: #db2777;
 }
 
 /* ==========================================================================
-   BRAND COLOR OVERRIDES: GOOGLE, WHATSAPP, META, SKY, MIDNIGHT
+   THEME FLAVORS: HARBOR, CARGO, BLUEPRINT, SKY, MIDNIGHT
    ========================================================================== */
 
-/* 1. Google Cloud / Google Tech Theme */
-[data-brand="google"].light {
-  --brand-primary: #1a73e8;
-  --brand-accent: #4285f4;
-  --brand-light: #e8f0fe;
-  --brand-text: #174ea6;
-  --brand-gradient: linear-gradient(135deg, #1a73e8 0%, #4285f4 50%, #34a853 100%);
-  --bg-page: #f8fafd;
-  --border-highlight: rgba(26, 115, 232, 0.3);
+/* 1. Harbor Theme (Standard Docker) */
+[data-brand="harbor"].dark {
+  --brand-primary: #0db7ed;
+  --brand-accent: #38bdf8;
+  --brand-light: #0b2b4c;
+  --brand-text: #7dd3fc;
 }
 
-[data-brand="google"].dark {
-  --brand-primary: #8ab4f8;
-  --brand-accent: #4285f4;
-  --brand-light: #172b4d;
-  --brand-text: #aecbfa;
-  --brand-gradient: linear-gradient(135deg, #4285f4 0%, #8ab4f8 100%);
-  --border-highlight: rgba(138, 180, 248, 0.3);
+/* 2. Cargo Wharf (Warm Amber & Wood shipping crates) */
+[data-brand="cargo"].dark {
+  --brand-primary: #f59e0b;
+  --brand-accent: #fbbf24;
+  --brand-light: #3d2305;
+  --brand-text: #fde68a;
+  --border-highlight: rgba(245, 158, 11, 0.4);
+}
+[data-brand="cargo"].light {
+  --brand-primary: #d97706;
+  --brand-accent: #f59e0b;
+  --brand-light: #fef3c7;
+  --brand-text: #92400e;
+  --border-highlight: rgba(217, 119, 6, 0.3);
 }
 
-/* 2. WhatsApp Green Theme */
-[data-brand="whatsapp"].light {
-  --brand-primary: #128c7e;
-  --brand-accent: #25d366;
-  --brand-light: #dcf8c6;
-  --brand-text: #075e54;
-  --brand-gradient: linear-gradient(135deg, #075e54 0%, #128c7e 50%, #25d366 100%);
-  --bg-page: #f4f7f6;
-  --border-highlight: rgba(18, 140, 126, 0.3);
+/* 3. Blueprint (Technical Cyan & Deep Navy) */
+[data-brand="blueprint"].dark {
+  --brand-primary: #06b6d4;
+  --brand-accent: #22d3ee;
+  --brand-light: #082f3a;
+  --brand-text: #67e8f9;
+  --border-highlight: rgba(6, 182, 212, 0.4);
+}
+[data-brand="blueprint"].light {
+  --brand-primary: #0891b2;
+  --brand-accent: #06b6d4;
+  --brand-light: #cffafe;
+  --brand-text: #155e75;
 }
 
-[data-brand="whatsapp"].dark {
-  --brand-primary: #25d366;
-  --brand-accent: #128c7e;
-  --brand-light: #052e23;
-  --brand-text: #4ade80;
-  --brand-gradient: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
-  --border-highlight: rgba(37, 211, 102, 0.3);
-}
-
-/* 3. Meta Blue Theme */
-[data-brand="meta"].light {
-  --brand-primary: #0866ff;
-  --brand-accent: #0080fb;
-  --brand-light: #e7f3ff;
-  --brand-text: #0052cc;
-  --brand-gradient: linear-gradient(135deg, #0866ff 0%, #0080fb 100%);
-  --bg-page: #f0f2f5;
-  --border-highlight: rgba(8, 102, 255, 0.3);
-}
-
-[data-brand="meta"].dark {
-  --brand-primary: #4799eb;
-  --brand-accent: #0866ff;
-  --brand-light: #0d2a4a;
-  --brand-text: #70b4f8;
-  --brand-gradient: linear-gradient(135deg, #0866ff 0%, #4799eb 100%);
-  --border-highlight: rgba(71, 153, 235, 0.3);
-}
-
-/* 4. Clean Sky Blue Theme */
-[data-brand="sky"].light {
-  --brand-primary: #0284c7;
-  --brand-accent: #0ea5e9;
-  --brand-light: #e0f2fe;
-  --brand-text: #0369a1;
-  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
-  --bg-page: #f8fafc;
-}
-
+/* 4. Clean Sky */
 [data-brand="sky"].dark {
   --brand-primary: #38bdf8;
-  --brand-accent: #0ea5e9;
+  --brand-accent: #7dd3fc;
   --brand-light: #082f49;
-  --brand-text: #7dd3fc;
-  --brand-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  --brand-text: #bae6fd;
+}
+[data-brand="sky"].light {
+  --brand-primary: #0284c7;
+  --brand-accent: #38bdf8;
+  --brand-light: #e0f2fe;
+  --brand-text: #0369a1;
 }
 
-/* 5. Midnight Theme */
+/* 5. Midnight Obsidian */
 [data-brand="midnight"] {
-  --brand-primary: #38bdf8;
-  --brand-accent: #818cf8;
-  --brand-light: #1e293b;
-  --brand-text: #93c5fd;
-  --brand-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  --brand-primary: #818cf8;
+  --brand-accent: #a5b4fc;
+  --brand-light: #1e1b4b;
+  --brand-text: #c7d2fe;
 }
 
 /* ==========================================================================
@@ -164,7 +157,7 @@ body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   overflow-x: hidden;
 }
 
@@ -174,7 +167,7 @@ h1, h2, h3, h4, .font-display {
 }
 
 code, pre, .font-mono-code {
-  font-family: var(--font-mono), Consolas, monospace;
+  font-family: var(--font-mono), Consolas, 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /* Custom Scrollbars */
@@ -196,7 +189,7 @@ code, pre, .font-mono-code {
   background: var(--text-muted);
 }
 
-/* Surface Utility Classes */
+/* Tactile Utility Classes */
 .bg-app-page {
   background-color: var(--bg-page);
 }
@@ -232,16 +225,36 @@ code, pre, .font-mono-code {
   border-color: var(--border-highlight);
 }
 
-/* Dynamic Mesh Grid Background */
+/* Tactical Blueprint Grid (LearnGitBranching style) */
 .bg-grid-pattern {
-  background-size: 32px 32px;
+  background-size: 28px 28px;
   background-image: 
-    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(2, 132, 199, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2, 132, 199, 0.08) 1px, transparent 1px);
 }
 
 html.dark .bg-grid-pattern {
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(13, 183, 237, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13, 183, 237, 0.06) 1px, transparent 1px);
+}
+
+/* Cartoonish Container Rib Pattern (Shipping Container Texture) */
+.bg-container-ribs {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.05) 8px,
+    rgba(255, 255, 255, 0.05) 12px
+  );
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

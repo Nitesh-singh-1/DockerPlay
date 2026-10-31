@@ -92,8 +92,15 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  manifest: '/manifest.webmanifest',
   alternates: {
     canonical: 'https://dockerplay.org/',
+  },
+  // Google AdSense site-ownership verification. Renders a server-side
+  // <meta name="google-adsense-account" content="..."> into <head>, which is
+  // the most reliable way for AdSense to verify and approve the site.
+  other: {
+    'google-adsense-account': 'ca-pub-3059241515168098',
   },
 };
 
@@ -105,9 +112,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} h-full overflow-hidden`}
-      data-brand="sky"
-      data-mode="light"
+      className={`dark ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} h-full overflow-hidden`}
+      data-brand="harbor"
+      data-mode="dark"
     >
       <head>
         <GoogleAdSense />

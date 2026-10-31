@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Dockerfile Studio — Multi-Stage Build Simulator & Layer Cache Inspector',
+  title: 'Dockerfile Studio — Build Images & Layers Visually',
   description:
-    'Build and optimize Dockerfiles with visual multi-stage pipeline flow, layer cache invalidation tracking, image size breakdown, and best practice linting.',
-  alternates: {
-    canonical: 'https://dockerplay.org/tools/dockerfile-studio/',
-  },
-  openGraph: {
-    title: 'Dockerfile Studio — Multi-Stage Layer Inspector | DockerPlay',
-    description: 'Visual multi-stage Dockerfile simulator and build cache inspector.',
-    url: 'https://dockerplay.org/tools/dockerfile-studio/',
-  },
+    'Build Dockerfiles step by step and watch the image layer stack and build cache update live. Learn multi-stage builds interactively, with zero installation.',
+  alternates: { canonical: 'https://dockerplay.org/tools/dockerfile-studio/' },
 };
 
-export default function DockerfileStudioLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DockerfileStudioLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

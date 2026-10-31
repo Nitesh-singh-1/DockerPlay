@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Docker Learning Dashboard & Skill Mastery Progress',
+  title: 'Your Docker Learning Dashboard',
   description:
-    'Track your Docker curriculum completion, missions solved, XP points, and streak status in your personal DockerPlay learning dashboard.',
-  alternates: {
-    canonical: 'https://dockerplay.org/dashboard/',
-  },
-  openGraph: {
-    title: 'Docker Learning Dashboard | DockerPlay',
-    description: 'Track your Docker curriculum completion and progress in DockerPlay.',
-    url: 'https://dockerplay.org/dashboard/',
-  },
+    'Track your Docker learning progress — XP, daily streaks, earned badges, and completed curriculum chapters.',
+  alternates: { canonical: 'https://dockerplay.org/dashboard/' },
 };
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

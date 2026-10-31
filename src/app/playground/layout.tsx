@@ -1,24 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Interactive Docker Playground & Terminal Simulator',
+  title: 'Docker Playground — Run Commands in Your Browser',
   description:
-    'Run real Docker CLI commands, inspect live container topologies, bridge virtual networks, and visualize layer stacks in your browser with zero installation.',
-  alternates: {
-    canonical: 'https://dockerplay.org/playground/',
-  },
-  openGraph: {
-    title: 'Interactive Docker Playground & Terminal Simulator | DockerPlay',
-    description:
-      'Run real Docker commands, inspect live container topologies, bridge virtual networks, and visualize layer stacks in your browser.',
-    url: 'https://dockerplay.org/playground/',
-  },
+    'A free, in-browser Docker playground: a live terminal paired with a visual container topology. Run real docker run, ps, exec, network, and volume commands with zero installation.',
+  alternates: { canonical: 'https://dockerplay.org/playground/' },
 };
 
-export default function PlaygroundLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PlaygroundLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

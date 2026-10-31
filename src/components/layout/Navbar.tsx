@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -11,7 +11,6 @@ import {
   HelpCircle,
   Layers,
   RotateCcw,
-  Sparkles,
   Command,
   Flame,
   Palette,
@@ -41,6 +40,9 @@ export function Navbar() {
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const toolsMenuRef = useRef<HTMLDivElement>(null);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+
   const { mode, brand, setBrand, toggleMode } = useTheme();
 
   useEffect(() => {
@@ -51,9 +53,24 @@ export function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (toolsMenuRef.current && !toolsMenuRef.current.contains(event.target as Node)) {
+        setIsToolsMenuOpen(false);
+      }
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target as Node)) {
+        setIsThemeMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Close menus on page change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsThemeMenuOpen(false);
     setIsToolsMenuOpen(false);
   }, [pathname]);
 
@@ -78,52 +95,35 @@ export function Navbar() {
     { href: '/tools/cheat-sheet/', label: 'Cheat Sheet', icon: HelpCircle, desc: 'Categorized CLI command reference' },
   ];
 
-  const allNavLinks = [
-    ...primaryNavLinks,
-    ...toolsNavLinks,
-  ];
-
   const brandThemes: Array<{
     id: ColorBrand;
     name: string;
     description: string;
     colorDot: string;
-    borderPreview: string;
   }> = [
     {
-      id: 'sky',
-      name: 'Clean Sky Blue',
-      description: 'Crisp white with sky blue accents',
-      colorDot: 'bg-sky-500',
-      borderPreview: 'border-sky-400',
+      id: 'harbor',
+      name: 'Docker Harbor',
+      description: 'Iconic Docker Whale Blue & deep nautical slate',
+      colorDot: 'bg-[#0db7ed]',
     },
     {
-      id: 'google',
-      name: 'Google Tech',
-      description: 'Google Cloud Blue & 4-color accents',
-      colorDot: 'bg-[#1a73e8]',
-      borderPreview: 'border-[#1a73e8]',
+      id: 'cargo',
+      name: 'Cargo Wharf',
+      description: 'Warm timber amber & container yard contrast',
+      colorDot: 'bg-[#f59e0b]',
     },
     {
-      id: 'whatsapp',
-      name: 'WhatsApp Green',
-      description: 'WhatsApp Emerald & Teal palette',
-      colorDot: 'bg-[#25D366]',
-      borderPreview: 'border-[#128C7E]',
-    },
-    {
-      id: 'meta',
-      name: 'Meta Royal Blue',
-      description: 'Meta / Facebook modern blue',
-      colorDot: 'bg-[#0866FF]',
-      borderPreview: 'border-[#0866FF]',
+      id: 'blueprint',
+      name: 'Electric Blueprint',
+      description: 'Technical cyan & architectural grid',
+      colorDot: 'bg-[#06b6d4]',
     },
     {
       id: 'midnight',
       name: 'Midnight Studio',
       description: 'Dark obsidian developer theme',
-      colorDot: 'bg-indigo-500',
-      borderPreview: 'border-indigo-500',
+      colorDot: 'bg-[#818cf8]',
     },
   ];
 
@@ -131,17 +131,18 @@ export function Navbar() {
     <>
       <header className="h-14 shrink-0 bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-color)] px-3 sm:px-4 lg:px-6 flex items-center justify-between z-40 transition-colors">
         {/* Brand & Left Navigation */}
-        <div className="flex items-center space-x-3 sm:space-x-5">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[var(--brand-primary)] to-[var(--brand-accent)] flex items-center justify-center shadow-md shadow-[var(--brand-primary)]/20 text-white">
-              <Layers className="w-4 h-4 group-hover:scale-110 transition-transform" />
+        <div className="flex items-center space-x-2 sm:space-x-5 min-w-0">
+          <Link href="/" className="flex items-center space-x-2 group shrink-0">
+            {/* Playful Whale / Container Icon */}
+            <div className="w-8 h-8 rounded-xl bg-[var(--brand-primary)] text-white flex items-center justify-center shadow-sm shadow-[var(--brand-primary)]/30 group-hover:scale-105 active:scale-95 transition-transform">
+              <Layers className="w-4 h-4" />
             </div>
-            <div className="flex items-center space-x-1.5">
+            <div className="flex items-baseline space-x-1">
               <span className="font-extrabold text-base font-display text-[var(--text-primary)] tracking-tight">
                 Docker<span className="text-[var(--brand-primary)]">Play</span>
               </span>
-              <span className="hidden sm:inline text-[9px] font-mono uppercase px-1.5 py-0.5 rounded-full bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/30">
-                {brand}
+              <span className="hidden sm:inline-block text-[10px] font-mono text-[var(--text-muted)] font-bold">
+                .org
               </span>
             </div>
           </Link>
@@ -158,9 +159,9 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] shadow-sm font-bold'
+                      ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] shadow-sm font-bold border border-[var(--brand-primary)]/20'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
                   }`}
                 >
@@ -170,176 +171,198 @@ export function Navbar() {
               );
             })}
 
-            {/* Tools Dropdown for Studios & Visualizers */}
-            <div className="relative">
+            {/* Tools Dropdown with Seamless Hover Bridge & Click Toggle */}
+            <div
+              ref={toolsMenuRef}
+              className="relative"
+              onMouseEnter={() => setIsToolsMenuOpen(true)}
+              onMouseLeave={() => setIsToolsMenuOpen(false)}
+            >
               <button
-                onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
-                className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  pathname?.startsWith('/tools')
-                    ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold shadow-sm'
+                onClick={() => setIsToolsMenuOpen((prev) => !prev)}
+                className={`flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  pathname?.startsWith('/tools') || isToolsMenuOpen
+                    ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
                 }`}
               >
-                <Box className="w-3.5 h-3.5" />
-                <span>Studios & Tools</span>
-                <ChevronDown className="w-3 h-3 text-[var(--text-muted)]" />
+                <span>Tools</span>
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform duration-200 ${
+                    isToolsMenuOpen ? 'rotate-180 text-[var(--brand-primary)]' : ''
+                  }`}
+                />
               </button>
 
+              {/* Seamless Dropdown: zero dead margin gap with top-full pt-1.5 buffer */}
               {isToolsMenuOpen && (
-                <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 text-xs space-y-1">
-                  <div className="px-2.5 py-1.5 border-b border-[var(--border-color)] mb-1">
-                    <span className="text-[10px] font-mono uppercase font-bold text-[var(--text-muted)] block">
-                      Interactive Studios & Tools
-                    </span>
+                <div className="absolute left-0 top-full pt-1.5 w-64 z-50">
+                  <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl p-2 animate-in fade-in zoom-in-95">
+                    {toolsNavLinks.map((tool) => {
+                      const Icon = tool.icon;
+                      const isToolActive = pathname === tool.href;
+                      return (
+                        <Link
+                          key={tool.href}
+                          href={tool.href}
+                          onClick={() => setIsToolsMenuOpen(false)}
+                          className={`flex items-start space-x-2.5 p-2 rounded-xl transition-all ${
+                            isToolActive
+                              ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
+                              : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
+                          }`}
+                        >
+                          <div className="p-1.5 rounded-lg bg-[var(--bg-subtle)] text-[var(--brand-primary)] mt-0.5 shrink-0">
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="text-xs">
+                            <span className="font-semibold block">{tool.label}</span>
+                            <span className="text-[10px] text-[var(--text-muted)] leading-tight block">
+                              {tool.desc}
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
-                  {toolsNavLinks.map((tool) => {
-                    const Icon = tool.icon;
-                    const isToolActive = pathname === tool.href;
-                    return (
-                      <Link
-                        key={tool.href}
-                        href={tool.href}
-                        onClick={() => setIsToolsMenuOpen(false)}
-                        className={`flex items-start space-x-2.5 p-2 rounded-xl transition-all ${
-                          isToolActive
-                            ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
-                            : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 text-[var(--brand-primary)] shrink-0 mt-0.5" />
-                        <div>
-                          <div className="font-semibold text-xs leading-tight">{tool.label}</div>
-                          <div className="text-[10.5px] text-[var(--text-muted)] leading-tight">{tool.desc}</div>
-                        </div>
-                      </Link>
-                    );
-                  })}
                 </div>
               )}
             </div>
           </nav>
         </div>
 
-        {/* Right Action Controls */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2">
-          {/* Level & XP Widget */}
+        {/* Right Side: Command Palette, Streak, Theme, Reset, Mobile Menu */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
+          {/* Quick Command Palette Button (Ctrl+K) */}
+          <button
+            onClick={() => setIsPaletteOpen(true)}
+            className="hidden sm:flex items-center space-x-2 px-2.5 py-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shadow-sm"
+            title="Search Docker Commands & Scenarios"
+          >
+            <Command className="w-3 h-3 text-[var(--brand-primary)]" />
+            <span className="hidden md:inline font-mono text-[11px]">Search...</span>
+            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] font-bold">
+              ⌘K
+            </kbd>
+          </button>
+
+          {/* Gamified Level & XP Pill */}
           <Link
             href="/dashboard/"
-            className="flex items-center space-x-1.5 px-2 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-primary)] transition-all shadow-sm"
-            title={`${levelInfo.progressXP} / 200 XP to next level`}
+            className="flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] transition-all text-xs text-[var(--text-secondary)] shadow-sm shrink-0"
+            title={`${levelInfo.title} • ${progress.xpPoints || 50} XP`}
           >
-            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 text-slate-950 font-bold font-mono text-[10px] flex items-center justify-center shadow-sm shrink-0">
-              {levelInfo.level}
-            </div>
-            <div className="hidden sm:flex flex-col text-left">
-              <span className="text-[9px] font-mono text-[var(--brand-primary)] font-bold leading-none">
-                {progress.xpPoints} XP
-              </span>
-            </div>
+            <span className="text-xs">🎖️</span>
+            <span className="font-bold text-[11px] font-mono text-[var(--brand-text)] hidden xs:inline">
+              {progress.xpPoints || 50} XP
+            </span>
           </Link>
 
-          {/* Streak Counter */}
+          {/* Study Streak */}
           <div
-            className="hidden md:flex items-center space-x-1 px-2 py-1 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-mono font-bold shrink-0"
-            title="Daily Study Streak"
+            className="flex items-center space-x-1 px-2 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-mono font-bold shrink-0"
+            title="Daily Learning Streak"
           >
-            <Flame className="w-3.5 h-3.5 fill-current text-orange-500 animate-pulse" />
-            <span>{progress.streakDays || 3}d</span>
+            <Flame className="w-3.5 h-3.5 fill-current text-amber-500 animate-pulse" />
+            <span className="text-[11px]">{progress.streakDays || 3}d</span>
           </div>
 
           {/* Light / Dark Mode Toggle */}
           <button
             onClick={toggleMode}
-            className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all shadow-sm"
+            className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all shadow-sm shrink-0"
             title={`Switch to ${mode === 'light' ? 'Dark' : 'Light'} Mode`}
           >
             {mode === 'light' ? (
-              <Moon className="w-4 h-4 text-indigo-600" />
+              <Moon className="w-4 h-4 text-slate-700" />
             ) : (
               <Sun className="w-4 h-4 text-amber-400" />
             )}
           </button>
 
-          {/* Theme Color Palette Dropdown */}
-          <div className="relative">
+          {/* Theme Palette Dropdown */}
+          <div ref={themeMenuRef} className="relative">
             <button
               onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-              className="flex items-center space-x-1 px-2 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-primary)] transition-all shadow-sm"
+              className="hidden sm:flex items-center space-x-1 px-2 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-primary)] transition-all shadow-sm shrink-0"
               title="Change Color Theme"
             >
               <Palette className="w-3.5 h-3.5 text-[var(--brand-primary)]" />
-              <span className="hidden md:inline font-medium text-[11px] capitalize">{brand}</span>
               <ChevronDown className="w-3 h-3 text-[var(--text-muted)]" />
             </button>
 
             {isThemeMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 text-xs">
-                <div className="px-2 py-1.5 border-b border-[var(--border-color)] mb-1">
-                  <span className="text-[10px] font-mono uppercase font-bold text-[var(--text-muted)] block">
-                    Brand Color Palette
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)]">
-                    Pick your study theme
-                  </span>
-                </div>
+              <div className="absolute right-0 top-full pt-1.5 w-60 z-50">
+                <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 animate-in fade-in zoom-in-95 text-xs">
+                  <div className="px-2 py-1.5 border-b border-[var(--border-color)] mb-1">
+                    <span className="text-[10px] font-mono uppercase font-bold text-[var(--text-muted)] block">
+                      Playground Palette
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)]">
+                      Docker aesthetic & node styling
+                    </span>
+                  </div>
 
-                <div className="space-y-1">
-                  {brandThemes.map((bt) => {
-                    const isSelected = brand === bt.id;
-                    return (
-                      <button
-                        key={bt.id}
-                        onClick={() => {
-                          setBrand(bt.id);
-                          setIsThemeMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
-                          isSelected
-                            ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
-                            : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2.5">
-                          <div className={`w-3.5 h-3.5 rounded-full ${bt.colorDot} border border-white/40 shadow-sm`} />
-                          <div>
-                            <span className="block font-medium leading-tight">{bt.name}</span>
-                            <span className="text-[10px] text-[var(--text-muted)] block leading-tight">{bt.description}</span>
+                  <div className="space-y-1">
+                    {brandThemes.map((bt) => {
+                      const isSelected = brand === bt.id;
+                      return (
+                        <button
+                          key={bt.id}
+                          onClick={() => {
+                            setBrand(bt.id);
+                            setIsThemeMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                            isSelected
+                              ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold'
+                              : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <div className={`w-3.5 h-3.5 rounded-full ${bt.colorDot} border border-white/40 shadow-sm shrink-0`} />
+                            <div>
+                              <span className="block font-medium leading-tight">{bt.name}</span>
+                              <span className="text-[10px] text-[var(--text-muted)] block leading-tight">
+                                {bt.description}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        {isSelected && <Check className="w-4 h-4 text-[var(--brand-primary)] shrink-0" />}
-                      </button>
-                    );
-                  })}
+                          {isSelected && <Check className="w-4 h-4 text-[var(--brand-primary)] shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* GitHub / Creator Profile Link */}
+          {/* GitHub Link */}
           <a
             href="https://github.com/Nitesh-singh-1/DockerPlay"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all shadow-sm group"
-            title="Architected & Maintained by Nitesh Singh on GitHub"
+            className="hidden md:flex items-center space-x-1 px-2.5 py-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-primary)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all shadow-sm shrink-0"
+            title="DockerPlay on GitHub"
           >
-            <Github className="w-3.5 h-3.5 text-[var(--text-primary)] group-hover:scale-110 transition-transform" />
-            <span className="font-semibold text-[11px] hidden md:inline">GitHub</span>
+            <Github className="w-3.5 h-3.5 text-[var(--text-primary)]" />
+            <span className="font-semibold text-[11px]">GitHub</span>
           </a>
 
-          {/* Reset Docker Engine Button */}
-          <div className="hidden sm:block">
+          {/* Reset Docker Daemon Button */}
+          <div className="shrink-0">
             {confirmReset ? (
               <div className="flex items-center space-x-1 animate-in fade-in">
                 <button
                   onClick={handleReset}
-                  className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold"
+                  className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold shadow-sm"
                 >
-                  Confirm Reset
+                  Reset?
                 </button>
                 <button
                   onClick={() => setConfirmReset(false)}
-                  className="p-1 text-[var(--text-muted)]"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -355,10 +378,10 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile Hamburger Toggle (Visible < lg) */}
+          {/* Mobile Hamburger Toggle (< lg) */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-colors"
+            className="lg:hidden p-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-[var(--brand-primary)] transition-colors shrink-0"
             title="Open Navigation Menu"
           >
             {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -373,7 +396,7 @@ export function Navbar() {
             Navigation Menu
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {allNavLinks.map((link) => {
+            {[...primaryNavLinks, ...toolsNavLinks].map((link) => {
               const Icon = link.icon;
               const isActive =
                 pathname === link.href ||
@@ -384,39 +407,39 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-2 p-3 rounded-2xl text-xs font-semibold transition-all ${
+                  className={`flex items-center space-x-2 p-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/40 shadow-sm'
+                      ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] font-bold border border-[var(--brand-primary)]/30 shadow-sm'
                       : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  <Icon className="w-4 h-4 text-[var(--brand-primary)]" />
-                  <span>{link.label}</span>
+                  <Icon className="w-4 h-4 text-[var(--brand-primary)] shrink-0" />
+                  <span className="truncate">{link.label}</span>
                 </Link>
               );
             })}
           </div>
 
-          {/* Mobile Quick Stats & Reset */}
-          <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between text-xs text-[var(--text-secondary)] px-1">
-            <div className="flex items-center space-x-2">
-              <Flame className="w-4 h-4 text-orange-500" />
-              <span>{progress.streakDays || 3} Day Study Streak</span>
+          {/* Mobile Palette Switcher */}
+          <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-[var(--text-muted)]">Theme Palette:</span>
+            <div className="flex items-center space-x-1.5">
+              {brandThemes.map((bt) => (
+                <button
+                  key={bt.id}
+                  onClick={() => setBrand(bt.id)}
+                  className={`w-6 h-6 rounded-full ${bt.colorDot} border-2 ${
+                    brand === bt.id ? 'border-white ring-2 ring-[var(--brand-primary)]' : 'border-transparent'
+                  }`}
+                  title={bt.name}
+                />
+              ))}
             </div>
-            <button
-              onClick={() => {
-                handleReset();
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-xs text-rose-500 font-bold hover:underline"
-            >
-              Reset Docker State
-            </button>
           </div>
         </div>
       )}
 
-      {/* Global Command Palette (Ctrl+K) */}
+      {/* Global Command Palette */}
       <CommandPalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} />
     </>
   );

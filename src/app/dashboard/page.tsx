@@ -9,11 +9,9 @@ import {
   Wrench,
   Terminal as TerminalIcon,
   CheckCircle2,
-  Sparkles,
   ArrowRight,
   Flame,
   Zap,
-  RotateCcw,
   Github,
   Layers,
 } from 'lucide-react';
@@ -49,46 +47,44 @@ export default function DashboardPage() {
   ) || DOCKER_MISSIONS[0];
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#070b14] bg-grid-pattern p-4 sm:p-6 lg:p-8 space-y-8 max-w-6xl mx-auto">
-      {/* Hero Welcome Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-white/10 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2.5">
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
+    <div className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl mx-auto transition-colors">
+      {/* Welcome & Level Hero Banner */}
+      <div className="p-5 sm:p-7 rounded-2xl bg-[var(--bg-card)] border-2 border-[var(--border-color)] shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-[var(--brand-light)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 font-bold">
                 Level {levelInfo.level} • {levelInfo.title}
               </span>
-              <span className="flex items-center space-x-1 text-xs text-orange-400 font-mono font-bold bg-orange-950/40 px-2 py-0.5 rounded-full border border-orange-800/40">
-                <Flame className="w-3.5 h-3.5 fill-current text-orange-400" />
+              <span className="flex items-center space-x-1 text-xs text-amber-500 font-mono font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                <Flame className="w-3.5 h-3.5 fill-current text-amber-500" />
                 <span>{progress.streakDays || 3} Day Study Streak</span>
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-100 font-display tracking-tight">
-              Welcome back, Docker Pioneer!
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] font-display tracking-tight">
+              Welcome back, Docker Captain!
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xl leading-relaxed">
-              Track your container orchestration mastery, earn skill badges, and practice real-world DevOps workflows.
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl leading-relaxed">
+              Track your container engineering skills, practice hands-on CLI missions, and unlock DevOps achievements.
             </p>
           </div>
 
           {/* XP & Level Progress Card */}
-          <div className="p-5 rounded-2xl bg-slate-950/80 border border-white/10 text-center min-w-[200px] shrink-0 shadow-xl">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">
+          <div className="p-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-center min-w-[200px] shrink-0 shadow-sm">
+            <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider block mb-1">
               Level Progression
             </span>
-            <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 font-display">
-              {progress.xpPoints} <span className="text-xs text-slate-400 font-mono">XP</span>
+            <div className="text-3xl font-extrabold text-[var(--brand-primary)] font-display">
+              {progress.xpPoints} <span className="text-xs text-[var(--text-muted)] font-mono">XP</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 mt-2.5 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-[var(--bg-card)] mt-2 overflow-hidden border border-[var(--border-color)]">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-500"
+                className="h-full bg-[var(--brand-primary)] transition-all duration-500"
                 style={{ width: `${levelInfo.progressPercent}%` }}
               />
             </div>
-            <span className="text-[10px] text-slate-500 font-mono mt-1.5 block">
+            <span className="text-[10px] text-[var(--text-muted)] font-mono mt-1.5 block">
               {levelInfo.progressXP} / 200 XP to Level {levelInfo.level + 1}
             </span>
           </div>
@@ -96,78 +92,78 @@ export default function DashboardPage() {
       </div>
 
       {/* 4 Stat Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Chapters */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2 hover:border-cyan-500/30 transition-all">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-display font-semibold">
-            <span>Chapters Mastered</span>
-            <BookOpen className="w-4 h-4 text-cyan-400" />
+        <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 hover:border-[var(--brand-primary)] transition-all shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-display font-semibold">
+            <span>Lessons Mastered</span>
+            <BookOpen className="w-4 h-4 text-[var(--brand-primary)]" />
           </div>
           <div className="flex items-baseline space-x-2 font-display">
-            <span className="text-3xl font-bold text-slate-100">
+            <span className="text-2xl font-bold text-[var(--text-primary)]">
               {progress.completedChapters.length}
             </span>
-            <span className="text-xs text-slate-500">/ {CURRICULUM_CHAPTERS.length}</span>
+            <span className="text-xs text-[var(--text-muted)]">/ {CURRICULUM_CHAPTERS.length}</span>
           </div>
         </div>
 
         {/* Missions */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2 hover:border-amber-500/30 transition-all">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-display font-semibold">
+        <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 hover:border-amber-500 transition-all shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-display font-semibold">
             <span>Missions Completed</span>
-            <Target className="w-4 h-4 text-amber-400" />
+            <Target className="w-4 h-4 text-amber-500" />
           </div>
           <div className="flex items-baseline space-x-2 font-display">
-            <span className="text-3xl font-bold text-slate-100">
+            <span className="text-2xl font-bold text-[var(--text-primary)]">
               {progress.completedMissions.length}
             </span>
-            <span className="text-xs text-slate-500">/ {DOCKER_MISSIONS.length}</span>
+            <span className="text-xs text-[var(--text-muted)]">/ {DOCKER_MISSIONS.length}</span>
           </div>
         </div>
 
         {/* Break / Fix */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2 hover:border-rose-500/30 transition-all">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-display font-semibold">
+        <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 hover:border-rose-500 transition-all shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-display font-semibold">
             <span>Break/Fix Solved</span>
-            <Wrench className="w-4 h-4 text-rose-400" />
+            <Wrench className="w-4 h-4 text-rose-500" />
           </div>
           <div className="flex items-baseline space-x-2 font-display">
-            <span className="text-3xl font-bold text-slate-100">
+            <span className="text-2xl font-bold text-[var(--text-primary)]">
               {progress.completedChallenges.length}
             </span>
-            <span className="text-xs text-slate-500">/ {TROUBLESHOOTING_CHALLENGES.length}</span>
+            <span className="text-xs text-[var(--text-muted)]">/ {TROUBLESHOOTING_CHALLENGES.length}</span>
           </div>
         </div>
 
         {/* Commands run */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2 hover:border-emerald-500/30 transition-all">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-display font-semibold">
+        <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 hover:border-emerald-500 transition-all shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-display font-semibold">
             <span>Commands Executed</span>
-            <TerminalIcon className="w-4 h-4 text-emerald-400" />
+            <TerminalIcon className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="flex items-baseline space-x-2 font-display">
-            <span className="text-3xl font-bold text-slate-100">
+            <span className="text-2xl font-bold text-[var(--text-primary)]">
               {progress.totalCommandsExecuted}
             </span>
-            <span className="text-xs text-slate-500">CLI Runs</span>
+            <span className="text-xs text-[var(--text-muted)]">Runs</span>
           </div>
         </div>
       </div>
 
       {/* Recommended Up Next Paths */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Next Lesson */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex flex-col justify-between space-y-4 shadow-xl">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-              Next Study Milestone
+        <div className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex flex-col justify-between space-y-3.5 shadow-sm">
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-[var(--brand-primary)] uppercase font-bold px-2 py-0.5 rounded-full bg-[var(--brand-light)] border border-[var(--brand-primary)]/20">
+              Next Study Lesson
             </span>
-            <h3 className="font-bold text-base text-slate-100 font-display">{nextChapter.title}</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{nextChapter.summary}</p>
+            <h3 className="font-bold text-sm text-[var(--text-primary)] font-display">{nextChapter.title}</h3>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed">{nextChapter.summary}</p>
           </div>
           <Link
             href={`/curriculum/${nextChapter.slug}/`}
-            className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-cyan-500/20 w-fit"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[var(--brand-primary)] hover:brightness-110 text-slate-950 text-xs font-bold transition-all shadow-sm w-fit active:scale-95"
           >
             <span>Continue Chapter 0{nextChapter.order}</span>
             <ArrowRight className="w-4 h-4" />
@@ -175,17 +171,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Next Mission */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex flex-col justify-between space-y-4 shadow-xl">
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-amber-400 uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+        <div className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex flex-col justify-between space-y-3.5 shadow-sm">
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono text-amber-500 uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">
               Recommended Quest
             </span>
-            <h3 className="font-bold text-base text-slate-100 font-display">{nextMission.title}</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{nextMission.scenario}</p>
+            <h3 className="font-bold text-sm text-[var(--text-primary)] font-display">{nextMission.title}</h3>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed">{nextMission.scenario}</p>
           </div>
           <Link
             href="/missions/"
-            className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-amber-500/20 w-fit"
+            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-sm w-fit active:scale-95"
           >
             <span>Launch Mission {nextMission.number}</span>
             <ArrowRight className="w-4 h-4" />
@@ -194,50 +190,23 @@ export default function DashboardPage() {
       </div>
 
       {/* Badges Showcase */}
-      <div className="p-6 rounded-3xl bg-slate-900/60 border border-white/10 space-y-4 shadow-xl">
-        <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2 font-display">
-          <Award className="w-4 h-4 text-emerald-400" />
-          <span>Earned DevOps Badges ({progress.unlockedBadges.length})</span>
+      <div className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-3 shadow-sm">
+        <h3 className="font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] font-mono flex items-center space-x-2">
+          <Award className="w-4 h-4 text-emerald-500" />
+          <span>DevOps Badges ({progress.unlockedBadges.length})</span>
         </h3>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {progress.unlockedBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-950 border border-white/10 text-xs text-slate-200 shadow-md hover:border-cyan-500/40 transition-all font-display"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] shadow-sm font-semibold"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-semibold">{badge}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>{badge}</span>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Creator & Portfolio Banner */}
-      <div className="p-5 rounded-3xl bg-slate-950/80 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-slate-950 font-bold font-mono text-xs shadow-md">
-            NS
-          </div>
-          <div>
-            <div className="font-bold text-slate-200 font-display">
-              DockerPlay • Open Source Project
-            </div>
-            <div className="text-[11px] text-slate-400">
-              Architected & Engineered by <strong className="text-cyan-400">Nitesh Singh</strong>
-            </div>
-          </div>
-        </div>
-
-        <a
-          href="https://github.com/Nitesh-singh-1/DockerPlay"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 font-semibold transition-all shadow-sm"
-        >
-          <Github className="w-3.5 h-3.5" />
-          <span>View on GitHub</span>
-        </a>
       </div>
     </div>
   );

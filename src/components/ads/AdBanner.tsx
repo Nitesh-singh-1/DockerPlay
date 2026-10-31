@@ -27,9 +27,11 @@ export function AdBanner({
   const isLoaded = useRef(false);
 
   const publisherId =
-    process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-0000000000000000';
+    process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'ca-pub-3059241515168098';
   const isLiveConfigured =
     publisherId && publisherId !== 'ca-pub-0000000000000000' && slotId;
+
+  const isDev = process.env.NODE_ENV !== 'production';
 
   useEffect(() => {
     if (isLiveConfigured && !isLoaded.current) {
@@ -42,8 +44,13 @@ export function AdBanner({
     }
   }, [isLiveConfigured]);
 
-  // If AdSense is not configured with real ID yet, show clean educational placeholder in development
+  // With Auto Ads (no manual slot IDs), these in-feed slots stay empty — Google
+  // injects ads automatically elsewhere. In production, render nothing so real
+  // visitors never see a "placeholder" box. Only show the helper box in dev.
   if (!isLiveConfigured) {
+    if (!isDev) {
+      return null;
+    }
     return (
       <div
         className={`w-full my-4 p-4 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-subtle)]/60 text-center transition-all ${className}`}

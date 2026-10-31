@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Docker Hands-On Missions — Real-World Scenario Challenges',
+  title: 'Docker Missions — Hands-On Practice Challenges',
   description:
-    '10 progressive real-world Docker missions. Practice multi-tier architecture, database persistence, volume mounts, bridge networking, and microservice orchestration.',
-  alternates: {
-    canonical: 'https://dockerplay.org/missions/',
-  },
-  openGraph: {
-    title: 'Docker Hands-On Missions | DockerPlay',
-    description: 'Solve real-world Docker scenario challenges in an interactive in-browser simulator.',
-    url: 'https://dockerplay.org/missions/',
-  },
+    'Learn Docker by doing. Complete guided, automatically-checked missions covering containers, images, networking, volumes, and Compose — all in your browser.',
+  alternates: { canonical: 'https://dockerplay.org/missions/' },
 };
 
-export default function MissionsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MissionsLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

@@ -59,7 +59,7 @@ export default function MissionsPage() {
             onClick={() => setMobileTab('mission')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'mission'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -71,7 +71,7 @@ export default function MissionsPage() {
             onClick={() => setMobileTab('terminal')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'terminal'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -83,7 +83,7 @@ export default function MissionsPage() {
             onClick={() => setMobileTab('list')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'list'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -281,7 +281,7 @@ export default function MissionsPage() {
         <div className="lg:hidden fixed bottom-4 right-4 z-30">
           <button
             onClick={() => setMobileTab('terminal')}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-white font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-slate-950 font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
           >
             <TerminalIcon className="w-4 h-4" />
             <span>Open Terminal ($)</span>

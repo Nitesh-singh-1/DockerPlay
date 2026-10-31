@@ -10,23 +10,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "var(--bg-page)",
+        foreground: "var(--text-primary)",
         docker: {
-          blue: "#0ea5e9",
-          dark: "#0284c7",
-          navy: "#0a0f1d",
-          card: "#111a2e",
-          border: "#1e293b",
-          accent: "#38bdf8",
+          whale: "#0db7ed",
+          blue: "#0284c7",
+          sky: "#38bdf8",
+          navy: "#080e1a",
+          card: "#132238",
+          cardHover: "#192c47",
+          border: "#1e3352",
         },
-        brand: {
-          cyan: "#06b6d4",
-          indigo: "#6366f1",
-          emerald: "#10b981",
-          amber: "#f59e0b",
-          rose: "#f43f5e",
-          purple: "#a855f7",
+        node: {
+          container: "var(--node-container)",
+          running: "var(--node-running)",
+          exited: "var(--node-exited)",
+          volume: "var(--node-volume)",
+          network: "var(--node-network)",
+          image: "var(--node-image)",
+          compose: "var(--node-compose)",
         },
       },
       fontFamily: {
@@ -39,6 +41,14 @@ export default {
           "Consolas",
           "monospace",
         ],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'tactile': '0 4px 0 0 rgba(0, 0, 0, 0.25)',
+        'tactile-hover': '0 2px 0 0 rgba(0, 0, 0, 0.25)',
       },
     },
   },

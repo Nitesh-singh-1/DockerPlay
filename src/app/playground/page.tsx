@@ -8,8 +8,12 @@ import {
   Server,
   Box,
   FileCode,
-  Sparkles,
   Terminal as TerminalIcon,
+  Play,
+  CheckCircle2,
+  X,
+  ArrowRight,
+  Zap,
 } from 'lucide-react';
 import { getDockerEngine } from '@/lib/simulator/DockerEngine';
 import { DockerState } from '@/types/docker';
@@ -34,6 +38,7 @@ export default function PlaygroundPage() {
   const [state, setState] = useState<DockerState>(() => engine.getState());
   const [activeTab, setActiveTab] = useState<VisualizerTab>('topology');
   const [mobileMode, setMobileMode] = useState<'visualizer' | 'terminal'>('visualizer');
+  const [showSpotlight, setShowSpotlight] = useState(true);
 
   useEffect(() => {
     const unsub = engine.subscribe((newState) => {
@@ -51,6 +56,14 @@ export default function PlaygroundPage() {
     { id: 'containers-table', label: 'Containers', icon: Box },
   ];
 
+  const containers = Object.values(state.containers);
+
+  const triggerLaunch = (cmd: string) => {
+    window.dispatchEvent(
+      new CustomEvent('dockerplay-run-command', { detail: { command: cmd } })
+    );
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-[var(--bg-page)] overflow-hidden">
       {/* Mobile View Switcher (< lg) */}
@@ -60,7 +73,7 @@ export default function PlaygroundPage() {
             onClick={() => setMobileMode('visualizer')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileMode === 'visualizer'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -71,7 +84,7 @@ export default function PlaygroundPage() {
             onClick={() => setMobileMode('terminal')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileMode === 'terminal'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -82,10 +95,10 @@ export default function PlaygroundPage() {
       </div>
 
       {/* Top Visualizer Tab Bar */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-[var(--bg-card)] border-b border-[var(--border-color)] overflow-x-auto shadow-sm no-scrollbar">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-[var(--bg-card)] border-b border-[var(--border-color)] overflow-x-auto shadow-sm no-scrollbar shrink-0">
         <div className="flex items-center space-x-1.5 shrink-0">
           <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider font-mono mr-2 hidden sm:inline">
-            Visualizer Mode:
+            Mode:
           </span>
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -99,7 +112,7 @@ export default function PlaygroundPage() {
                 }}
                 className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
                   isActive
-                    ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 shadow-sm'
+                    ? 'bg-[var(--brand-light)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 shadow-sm font-bold'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
                 }`}
               >
@@ -115,6 +128,42 @@ export default function PlaygroundPage() {
           <span>Real-time State Sync</span>
         </div>
       </div>
+
+      {/* First-Time Spotlight Tour Banner (Visible when harbor is empty) */}
+      {containers.length === 0 && showSpotlight && (
+        <div className="shrink-0 mx-2.5 mt-2 p-3 sm:p-3.5 rounded-2xl bg-[var(--brand-light)] border-2 border-[var(--brand-primary)]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-sm animate-in fade-in duration-200">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-[var(--brand-primary)] text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-sm">
+              <Zap className="w-4 h-4" />
+            </div>
+            <div className="text-xs">
+              <strong className="font-bold text-[var(--text-primary)] font-display block">
+                Quick Start: Dock Your First Container
+              </strong>
+              <span className="text-[var(--text-secondary)] text-[11px]">
+                Run an Nginx web server on port 8080 and watch it dock live onto the harbor topology:
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0 w-full md:w-auto justify-end">
+            <button
+              onClick={() => triggerLaunch('docker run -d --name web -p 8080:80 nginx:alpine')}
+              className="flex-1 md:flex-none flex items-center justify-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--brand-primary)] text-slate-950 font-bold text-xs hover:brightness-110 active:scale-95 transition-all shadow-sm font-mono"
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span>Launch Nginx (:8080)</span>
+            </button>
+            <button
+              onClick={() => setShowSpotlight(false)}
+              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              title="Dismiss prompt"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Split Layout: Desktop 7:5 / Mobile Toggle */}
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2.5 p-2.5 overflow-hidden">
@@ -149,7 +198,7 @@ export default function PlaygroundPage() {
         <div className="lg:hidden fixed bottom-4 right-4 z-30">
           <button
             onClick={() => setMobileMode('terminal')}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-white font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-slate-950 font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
           >
             <TerminalIcon className="w-4 h-4" />
             <span>Open Terminal ($)</span>

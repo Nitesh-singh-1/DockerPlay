@@ -8,13 +8,14 @@ import {
   Check,
   Maximize2,
   Minimize2,
-  Sparkles,
   ChevronRight,
   Zap,
   X,
   AlertTriangle,
   Info,
-  HelpCircle,
+  BookOpen,
+  ArrowRight,
+  RotateCw,
 } from 'lucide-react';
 import { getDockerEngine } from '@/lib/simulator/DockerEngine';
 import { CommandParser } from '@/lib/parser/CommandParser';
@@ -55,7 +56,6 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [isCopied, setIsCopied] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -75,7 +75,7 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isMaximized]);
 
-  // Global listener for "⚡ Run in Terminal" clicks from lessons
+  // Global listener for "Run in Terminal" events from curriculum & playground
   useEffect(() => {
     const handleRunEvent = (e: CustomEvent<{ command: string }>) => {
       if (e.detail && e.detail.command) {
@@ -86,67 +86,79 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
     return () => window.removeEventListener('dockerplay-run-command' as any, handleRunEvent as any);
   }, []);
 
-  const matchingSuggestions = input.trim().length > 1
-    ? COMMAND_SUGGESTIONS.filter((s) => s.command.toLowerCase().startsWith(input.trim().toLowerCase()) || s.example.toLowerCase().includes(input.trim().toLowerCase())).slice(0, 4)
+  // Compute best ghost autocomplete suggestion
+  const trimmedInput = input.trim();
+  const topMatch = trimmedInput.length > 0
+    ? COMMAND_SUGGESTIONS.find((s) => s.example.toLowerCase().startsWith(trimmedInput.toLowerCase()))?.example
+    : null;
+
+  const ghostText = topMatch && topMatch.length > input.length
+    ? topMatch.slice(input.length)
+    : '';
+
+  const matchingSuggestions = trimmedInput.length > 1
+    ? COMMAND_SUGGESTIONS.filter(
+        (s) =>
+          s.command.toLowerCase().startsWith(trimmedInput.toLowerCase()) ||
+          s.example.toLowerCase().includes(trimmedInput.toLowerCase())
+      ).slice(0, 4)
     : [];
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       runCommandString(input);
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      if (topMatch) {
+        setInput(topMatch);
+      }
+    } else if (e.key === 'ArrowRight' && inputRef.current?.selectionStart === input.length && topMatch) {
+      e.preventDefault();
+      setInput(topMatch);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (commandHistory.length > 0) {
         const nextIndex = Math.min(commandHistory.length - 1, cmdHistoryIndex + 1);
         setCmdHistoryIndex(nextIndex);
-        setInput(commandHistory[nextIndex]);
+        setInput(commandHistory[commandHistory.length - 1 - nextIndex]);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (cmdHistoryIndex > 0) {
         const nextIndex = cmdHistoryIndex - 1;
         setCmdHistoryIndex(nextIndex);
-        setInput(commandHistory[nextIndex]);
+        setInput(commandHistory[commandHistory.length - 1 - nextIndex]);
       } else if (cmdHistoryIndex === 0) {
         setCmdHistoryIndex(-1);
         setInput('');
       }
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      if (matchingSuggestions.length > 0) {
-        const selected = matchingSuggestions[activeSuggestionIndex] || matchingSuggestions[0];
-        setInput(selected.example || selected.command);
-      }
     }
   };
 
-  const runCommandString = (cmd: string) => {
-    const rawCmd = cmd.trim();
+  const runCommandString = (cmdToRun: string) => {
+    const rawCmd = cmdToRun.trim();
     if (!rawCmd) return;
 
-    if (rawCmd.toLowerCase() === 'clear') {
+    // Handle clear
+    if (rawCmd === 'clear' || rawCmd === 'cls') {
       setHistory([]);
       setInput('');
       return;
     }
 
+    const engine = getDockerEngine();
     const parsed = CommandParser.parse(rawCmd);
-    const result = getDockerEngine().execute(parsed);
-
-    if (result.stdout === '__CLEAR__') {
-      setHistory([]);
-      setInput('');
-      return;
-    }
+    const result = engine.execute(parsed);
 
     const newEntry: HistoryEntry = {
-      id: `hist-${Date.now()}-${Math.random()}`,
+      id: `cmd-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       command: rawCmd,
       result,
       timestamp: new Date().toLocaleTimeString(),
     };
 
     setHistory((prev) => [...prev, newEntry]);
-    setCommandHistory((prev) => [rawCmd, ...prev.filter((c) => c !== rawCmd)]);
+    setCommandHistory((prev) => [...prev, rawCmd]);
     setCmdHistoryIndex(-1);
     setInput('');
 
@@ -165,29 +177,29 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   };
 
   const quickCommands = [
-    { label: 'docker ps -a', cmd: 'docker ps -a' },
-    { label: 'run nginx', cmd: 'docker run -d --name web -p 8080:80 nginx:alpine' },
-    { label: 'run postgres with volume', cmd: 'docker run -d --name db -v pgdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=secret postgres:16-alpine' },
+    { label: 'docker ps', cmd: 'docker ps' },
+    { label: 'run nginx (:80)', cmd: 'docker run -d --name web -p 8080:80 nginx:alpine' },
+    { label: 'run postgres (vol)', cmd: 'docker run -d --name db -v pgdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=secret postgres:16-alpine' },
     { label: 'create network', cmd: 'docker network create app-net' },
     { label: 'compose up', cmd: 'docker compose up -d' },
   ];
 
   const terminalBody = (
-    <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden bg-[#080d1a] text-slate-200">
+    <div className="flex-1 min-h-0 flex flex-col w-full h-full overflow-hidden bg-[#070d18] text-slate-200">
       {/* Terminal Title Bar */}
-      <div className="shrink-0 h-11 flex items-center justify-between px-3 sm:px-4 bg-slate-950/95 border-b border-slate-800 text-slate-400 select-none backdrop-blur-md">
+      <div className="shrink-0 h-10 flex items-center justify-between px-3 sm:px-4 bg-[#0a1222] border-b border-[#1a2b45] text-slate-400 select-none">
         {/* Left: Window Controls + Title */}
         <div className="flex items-center space-x-2 shrink-0 min-w-0">
-          <div className="flex space-x-1.5 mr-0.5 shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" />
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm" />
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
+          <div className="flex space-x-1.5 mr-1 shrink-0">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
           </div>
-          <TerminalIcon className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="font-bold text-slate-100 text-xs font-display tracking-wide whitespace-nowrap">
+          <TerminalIcon className="w-3.5 h-3.5 text-[#0db7ed] shrink-0" />
+          <span className="font-bold text-slate-100 text-xs font-display tracking-tight whitespace-nowrap truncate">
             Docker Terminal
           </span>
-          <span className="hidden sm:inline-block text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/40 shrink-0">
+          <span className="hidden sm:inline-block text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded bg-[#0b2b4c] text-[#38bdf8] border border-[#0284c7]/30 shrink-0">
             v27.1
           </span>
         </div>
@@ -196,20 +208,20 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
         <div className="flex items-center space-x-1 shrink-0">
           <button
             onClick={() => setShowBeginnerMode(!showBeginnerMode)}
-            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-0.5 rounded-lg text-[10.5px] font-semibold transition-colors ${
               showBeginnerMode
-                ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-700/50'
-                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                ? 'bg-[#0b2b4c] text-[#38bdf8] border border-[#0284c7]/40'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
             }`}
-            title="Toggle Beginner Explanations"
+            title="Toggle Educational Explanations"
           >
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden xl:inline text-[10.5px]">Explanations</span>
+            <BookOpen className="w-3 h-3 shrink-0" />
+            <span className="hidden md:inline">Explain</span>
           </button>
 
           <button
             onClick={copyAllOutput}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
             title="Copy Terminal Output"
           >
             {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -217,7 +229,7 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
           <button
             onClick={() => setHistory([])}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors"
             title="Clear Console"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -225,24 +237,24 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
           <button
             onClick={() => setIsMaximized(!isMaximized)}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors text-[11px]"
+            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-[#0db7ed] transition-colors"
             title={isMaximized ? 'Exit Fullscreen (Esc)' : 'Maximize Terminal'}
           >
-            {isMaximized ? <Minimize2 className="w-3.5 h-3.5 text-cyan-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isMaximized ? <Minimize2 className="w-3.5 h-3.5 text-[#0db7ed]" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
-      {/* Quick Launch Command Bar */}
-      <div className="shrink-0 bg-slate-900/90 border-b border-slate-800/80 px-3.5 py-1.5 flex items-center space-x-2 overflow-x-auto text-[11px] select-none scrollbar-none">
-        <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider flex items-center shrink-0">
+      {/* Quick Launch Chips Bar */}
+      <div className="shrink-0 bg-[#08101f] border-b border-[#14233a] px-3 py-1.5 flex items-center space-x-1.5 overflow-x-auto text-[11px] select-none no-scrollbar">
+        <span className="text-slate-400 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center shrink-0 mr-1">
           <Zap className="w-3 h-3 mr-1 text-amber-400" /> Quick:
         </span>
         {quickCommands.map((qc, idx) => (
           <button
             key={idx}
             onClick={() => runCommandString(qc.cmd)}
-            className="shrink-0 px-2 py-0.5 rounded bg-slate-800/90 hover:bg-cyan-950 hover:text-cyan-300 hover:border-cyan-700/50 border border-slate-700/60 text-slate-300 transition-all font-mono text-[10.5px]"
+            className="shrink-0 px-2 py-0.5 rounded-md bg-[#0e1b30] hover:bg-[#0b2b4c] hover:text-[#38bdf8] border border-[#1a2d4b] hover:border-[#0284c7]/50 text-slate-300 transition-all font-mono text-[10.5px] active:scale-95"
           >
             {qc.label}
           </button>
@@ -251,27 +263,46 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
       {/* Output Console Buffer */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3.5 font-mono-code leading-relaxed text-slate-300 bg-[#070c18]"
+        className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 font-mono-code leading-relaxed text-slate-300 bg-[#070d18]"
         onClick={() => inputRef.current?.focus()}
       >
         {history.map((entry) => (
           <div key={entry.id} className="space-y-1.5 group animate-in fade-in duration-100">
-            {/* Command Header */}
-            <div className="flex items-center space-x-2">
-              <span className="text-cyan-400 font-bold">$</span>
-              <span className="font-bold text-slate-100 text-xs">{entry.command}</span>
-              <span className="text-[10px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+            {/* Command Prompt Line with Hover Actions */}
+            <div className="flex items-center space-x-2 text-xs">
+              <span className="text-emerald-400 font-bold">$</span>
+              <span
+                onClick={() => setInput(entry.command)}
+                className="font-bold text-slate-100 cursor-pointer hover:underline"
+                title="Click to copy to input"
+              >
+                {entry.command}
+              </span>
+
+              {/* Hover Quick Re-run Action */}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 ml-1">
+                <button
+                  onClick={() => runCommandString(entry.command)}
+                  className="px-1.5 py-0.2 rounded bg-slate-800 hover:bg-[#0b2b4c] text-[10px] text-[#38bdf8] flex items-center space-x-1"
+                  title="Re-run this command"
+                >
+                  <RotateCw className="w-2.5 h-2.5" />
+                  <span>Re-run</span>
+                </button>
+              </div>
+
+              <span className="text-[10px] text-slate-600 ml-auto">
                 {entry.timestamp}
               </span>
             </div>
 
             {/* Beginner Breakdown Chips */}
             {showBeginnerMode && entry.result.beginnerBreakdown && entry.result.beginnerBreakdown.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 my-1.5 p-2 rounded-lg bg-slate-900/60 border border-slate-800/60">
+              <div className="flex flex-wrap gap-1.5 my-1.5 p-2 rounded-lg bg-[#0c172a] border border-[#1a2b45]">
                 {entry.result.beginnerBreakdown.map((b, bIdx) => (
-                  <div key={bIdx} className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-slate-800/80 text-[10px] border border-slate-700/50">
-                    <span className="font-mono text-cyan-300 font-semibold">{b.token}</span>
-                    <span className="text-slate-400">→</span>
+                  <div key={bIdx} className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-[#132238] text-[10px] border border-[#1e3452]">
+                    <span className="font-mono text-[#38bdf8] font-bold">{b.token}</span>
+                    <span className="text-slate-400">➔</span>
                     <span className="text-slate-300">{b.description}</span>
                   </div>
                 ))}
@@ -280,46 +311,46 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
             {/* Standard Output */}
             {entry.result.stdout && (
-              <pre className="text-slate-300 whitespace-pre-wrap pl-3.5 border-l-2 border-cyan-500/30 overflow-x-auto text-[11.5px] leading-relaxed">
+              <pre className="text-slate-300 whitespace-pre-wrap pl-3 border-l-2 border-[#0284c7] overflow-x-auto text-[11px] leading-relaxed">
                 {entry.result.stdout}
               </pre>
             )}
 
             {/* Error Output */}
             {entry.result.stderr && (
-              <pre className="text-rose-400 whitespace-pre-wrap pl-3.5 border-l-2 border-rose-500/40 overflow-x-auto text-[11.5px] leading-relaxed bg-rose-950/20 p-2 rounded-r-lg">
+              <pre className="text-rose-400 whitespace-pre-wrap pl-3 border-l-2 border-rose-500 overflow-x-auto text-[11px] leading-relaxed bg-rose-950/20 p-2 rounded-r-lg">
                 {entry.result.stderr}
               </pre>
             )}
 
             {/* Educational "What Just Happened?" Explainer Box */}
             {showBeginnerMode && entry.result.explanation && (
-              <div className={`mt-2.5 p-3.5 rounded-xl border text-xs shadow-lg space-y-2 ${
+              <div className={`mt-2 p-3 rounded-xl border text-xs shadow-sm space-y-1.5 ${
                 entry.result.exitCode !== 0
-                  ? 'bg-rose-950/20 border-rose-500/30 text-rose-200'
-                  : 'bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-cyan-500/30 text-cyan-300'
+                  ? 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                  : 'bg-[#0b172a] border-[#1e3555] text-slate-200'
               }`}>
-                <div className="flex items-center space-x-2 font-bold font-display">
+                <div className="flex items-center space-x-2 font-bold font-display text-xs">
                   {entry.result.exitCode !== 0 ? (
-                    <AlertTriangle className="w-4 h-4 text-rose-400" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                   ) : (
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                    <Info className="w-3.5 h-3.5 text-[#0db7ed]" />
                   )}
                   <span>{entry.result.explanation.title}</span>
                 </div>
                 <p className="text-slate-300 text-[11px] leading-relaxed">
                   {entry.result.explanation.summary}
                 </p>
-                <div className="space-y-1 pl-2 border-l border-slate-800 text-[11px] text-slate-400">
+                <div className="space-y-0.5 pl-2 border-l border-slate-700 text-[10.5px] text-slate-400">
                   {entry.result.explanation.steps.map((step, idx) => (
-                    <div key={idx} className="flex items-start space-x-1.5">
+                    <div key={idx} className="flex items-start space-x-1">
                       <ChevronRight className={`w-3 h-3 mt-0.5 shrink-0 ${entry.result.exitCode !== 0 ? 'text-rose-400' : 'text-emerald-400'}`} />
                       <span>{step}</span>
                     </div>
                   ))}
                 </div>
-                <div className="pt-2 border-t border-slate-800/80 text-[10.5px] text-slate-400 italic">
-                  💡 <strong className="text-slate-300">Why this matters:</strong> {entry.result.explanation.why}
+                <div className="pt-1.5 border-t border-slate-800 text-[10.5px] text-slate-400">
+                  <strong className="text-[#38bdf8]">💡 Key Takeaway:</strong> {entry.result.explanation.why}
                 </div>
               </div>
             )}
@@ -330,13 +361,15 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
       {/* Autocomplete Suggestions Bar */}
       {matchingSuggestions.length > 0 && (
-        <div className="shrink-0 bg-slate-950 border-t border-slate-800 px-3 py-2 flex flex-wrap gap-1.5 text-[11px]">
-          <span className="text-slate-500 font-semibold uppercase text-[10px] self-center mr-1">Suggestions:</span>
+        <div className="shrink-0 bg-[#091120] border-t border-[#14233a] px-3 py-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+          <span className="text-slate-500 font-semibold uppercase text-[10px] self-center mr-1">
+            Tab Complete:
+          </span>
           {matchingSuggestions.map((s, idx) => (
             <button
               key={idx}
               onClick={() => runCommandString(s.example)}
-              className="px-2 py-0.5 rounded-md bg-slate-900 text-cyan-300 border border-slate-700 hover:border-cyan-400 font-mono text-[10.5px] transition-colors"
+              className="px-2 py-0.5 rounded-md bg-[#0e1b30] text-[#38bdf8] border border-[#1e3452] hover:border-[#0284c7] font-mono text-[10.5px] transition-colors"
             >
               {s.example}
             </button>
@@ -344,25 +377,43 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
         </div>
       )}
 
-      {/* Terminal Input Line */}
-      <div className="shrink-0 flex items-center px-4 py-2.5 bg-slate-950 border-t border-slate-800">
-        <span className="text-cyan-400 font-bold mr-2 text-sm">$</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type 'docker run -d --name web -p 8080:80 nginx:alpine' or 'docker ps'"
-          className="flex-1 bg-transparent text-slate-100 placeholder-slate-600 focus:outline-none font-mono text-xs"
-          spellCheck={false}
-          autoComplete="off"
-        />
+      {/* Terminal Input Line with Inline Ghost Text */}
+      <div className="shrink-0 flex items-center px-3 sm:px-4 py-2 bg-[#091120] border-t border-[#14233a] relative">
+        <span className="text-emerald-400 font-bold mr-2 text-sm shrink-0">$</span>
+
+        {/* Input & Ghost Text Wrapper */}
+        <div className="flex-1 relative flex items-center">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="docker run -d --name web -p 8080:80 nginx:alpine"
+            className="w-full bg-transparent text-slate-100 placeholder-slate-600 focus:outline-none font-mono text-xs z-10"
+            spellCheck={false}
+            autoComplete="off"
+          />
+
+          {/* Inline Ghost Suggestion Text */}
+          {ghostText && (
+            <div
+              className="absolute left-0 pointer-events-none font-mono text-xs text-slate-600 flex items-center select-none"
+              style={{ paddingLeft: `${input.length * 7.2}px` }}
+            >
+              <span>{ghostText}</span>
+              <span className="ml-2 px-1 py-0.2 rounded bg-slate-800 text-[9px] text-slate-400 border border-slate-700">
+                Tab ⇥
+              </span>
+            </div>
+          )}
+        </div>
+
         <button
           onClick={() => runCommandString(input)}
-          className="ml-2 px-3.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all shadow-md shadow-cyan-500/20"
+          className="ml-2 px-3 py-1 rounded-xl bg-[#0db7ed] hover:bg-[#38bdf8] text-slate-950 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
         >
-          Execute
+          Run
         </button>
       </div>
     </div>
@@ -370,8 +421,8 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
 
   if (isMaximized) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/90 backdrop-blur-md p-4 sm:p-6 animate-in fade-in zoom-in-95 duration-150">
-        <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col bg-[#080d1a]">
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/90 backdrop-blur-md p-3 sm:p-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="w-full h-full rounded-2xl overflow-hidden border border-[#1e3352] shadow-2xl flex flex-col bg-[#070d18]">
           {terminalBody}
         </div>
       </div>
@@ -379,7 +430,7 @@ export function DockerTerminal({ onCommandExecuted, className = '', initialPromp
   }
 
   return (
-    <div className={`flex flex-col h-full min-h-0 w-full rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden ${className}`}>
+    <div className={`flex flex-col h-full min-h-0 w-full rounded-2xl border border-[var(--border-color)] shadow-sm overflow-hidden ${className}`}>
       {terminalBody}
     </div>
   );

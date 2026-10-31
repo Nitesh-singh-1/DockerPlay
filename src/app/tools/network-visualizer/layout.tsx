@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Docker Network Visualizer — Bridge, Host & Embedded DNS Tracer',
+  title: 'Docker Network Visualizer — Bridge & DNS Tracer',
   description:
-    'Simulate Docker container networking topologies. Trace bridge packet flows, inspect iptables port mappings, and test embedded 127.0.0.11 DNS resolution.',
-  alternates: {
-    canonical: 'https://dockerplay.org/tools/network-visualizer/',
-  },
-  openGraph: {
-    title: 'Docker Network Visualizer & DNS Tracer | DockerPlay',
-    description: 'Visual container networking simulator and embedded DNS packet tracer.',
-    url: 'https://dockerplay.org/tools/network-visualizer/',
-  },
+    'Visualize Docker networking: trace packets across bridge networks, watch embedded DNS (127.0.0.11) resolve container names, and understand port publishing interactively.',
+  alternates: { canonical: 'https://dockerplay.org/tools/network-visualizer/' },
 };
 
-export default function NetworkVisualizerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function NetworkVisualizerLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

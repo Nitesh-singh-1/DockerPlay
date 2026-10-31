@@ -83,7 +83,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
             onClick={() => setMobileTab('lesson')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'lesson'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -95,7 +95,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
             onClick={() => setMobileTab('terminal')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'terminal'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -107,7 +107,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
             onClick={() => setMobileTab('chapters')}
             className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               mobileTab === 'chapters'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm font-bold'
+                ? 'bg-[var(--brand-primary)] text-slate-950 shadow-sm font-bold'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
             }`}
           >
@@ -298,7 +298,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
 
             <button
               onClick={() => setIsQuizOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-white font-bold text-xs hover:brightness-110 transition-all shadow-md shadow-[var(--brand-primary)]/20 shrink-0"
+              className="px-4 py-2 rounded-xl bg-[var(--brand-primary)] text-slate-950 font-bold text-xs hover:brightness-110 transition-all shadow-md shadow-[var(--brand-primary)]/20 shrink-0"
             >
               {quizScore ? 'Retake Quiz' : 'Start Quiz'}
             </button>
@@ -335,7 +335,7 @@ export function ChapterView({ chapterId }: ChapterViewProps) {
         <div className="lg:hidden fixed bottom-4 right-4 z-30">
           <button
             onClick={() => setMobileTab('terminal')}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-white font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
+            className="flex items-center space-x-2 px-4 py-2.5 rounded-full bg-[var(--brand-primary)] text-slate-950 font-bold text-xs shadow-xl shadow-[var(--brand-primary)]/30 hover:scale-105 active:scale-95 transition-all"
           >
             <TerminalIcon className="w-4 h-4" />
             <span>Open Terminal ($)</span>

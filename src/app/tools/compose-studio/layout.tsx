@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Docker Compose Studio — Visual Multi-Container YAML Editor & Graph',
+  title: 'Docker Compose Studio — Visual YAML Editor',
   description:
-    'Design and validate docker-compose.yml files interactively with real-time dependency topology diagrams, port collision detection, and instant startup simulation.',
-  alternates: {
-    canonical: 'https://dockerplay.org/tools/compose-studio/',
-  },
-  openGraph: {
-    title: 'Docker Compose Studio — Multi-Container Visual Editor | DockerPlay',
-    description: 'Visual YAML editor and service dependency graph for Docker Compose.',
-    url: 'https://dockerplay.org/tools/compose-studio/',
-  },
+    'Write, edit, and visualize multi-service docker-compose.yml files online. See service dependencies, networks, and volumes come alive as you type — no setup required.',
+  alternates: { canonical: 'https://dockerplay.org/tools/compose-studio/' },
 };
 
-export default function ComposeStudioLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ComposeStudioLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

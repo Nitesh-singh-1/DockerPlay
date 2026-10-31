@@ -4,12 +4,10 @@ import { CURRICULUM_CHAPTERS } from '@/data/curriculum';
 import { ChapterView } from '@/components/curriculum/ChapterView';
 
 export function generateStaticParams() {
-  const params: { chapterId: string }[] = [];
-  for (const ch of CURRICULUM_CHAPTERS) {
-    params.push({ chapterId: ch.slug });
-    params.push({ chapterId: ch.id });
-  }
-  return params;
+  // Generate one canonical URL per chapter (slug only). We intentionally do NOT
+  // also generate id-based routes (e.g. /curriculum/ch-01/) — they were exact
+  // duplicates of the slug pages, wasted crawl budget, and nothing links to them.
+  return CURRICULUM_CHAPTERS.map((ch) => ({ chapterId: ch.slug }));
 }
 
 export async function generateMetadata({

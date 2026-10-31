@@ -1,23 +1,13 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Docker Commands Cheat Sheet & Comprehensive CLI Reference',
+  title: 'Docker Commands Cheat Sheet — Searchable Reference',
   description:
-    'Complete, searchable Docker CLI command cheat sheet. Copy-ready examples for containers, images, volumes, bridge networks, and Docker Compose.',
-  alternates: {
-    canonical: 'https://dockerplay.org/tools/cheat-sheet/',
-  },
-  openGraph: {
-    title: 'Docker Commands Cheat Sheet & CLI Reference | DockerPlay',
-    description: 'Fast, searchable reference guide for all essential Docker CLI commands.',
-    url: 'https://dockerplay.org/tools/cheat-sheet/',
-  },
+    'A categorized, searchable Docker CLI cheat sheet. Find the right docker run, build, compose, network, and volume commands with real examples and explanations.',
+  alternates: { canonical: 'https://dockerplay.org/tools/cheat-sheet/' },
 };
 
-export default function CheatSheetLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function CheatSheetLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

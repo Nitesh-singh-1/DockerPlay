@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "export": "next build",
-    "deploy": "npm run build && firebase deploy --only hosting",
+    "clean": "node -e \"const fs=require('fs');['.next','out'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\"",
+    "deploy": "npm run clean && npm run build && firebase deploy --only hosting",
     "start": "next start",
     "lint": "next lint"
   },
